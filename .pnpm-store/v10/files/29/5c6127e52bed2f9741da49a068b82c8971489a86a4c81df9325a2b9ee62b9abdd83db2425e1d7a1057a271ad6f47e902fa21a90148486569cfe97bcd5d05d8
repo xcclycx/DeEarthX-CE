@@ -1,0 +1,64 @@
+import { useEffect, useState, Suspense } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import {
+  normalizeConfig,
+  type InstallerConfig,
+  type NormalizedConfig,
+  type ThemeName,
+} from "./types";
+import { useInstaller } from "./useInstaller";
+import { resolveTheme } from "./themes";
+
+const THEME_DIMENSIONS: Record<ThemeName, { width: number; height: number }> = {
+  aurora: { width: 440, height: 510 },
+  minimal: { width: 460, height: 520 },
+  geist: { width: 480, height: 420 },
+  bento: { width: 580, height: 520 },
+  coral: { width: 820, height: 540 },
+  titanium: { width: 840, height: 560 },
+  glass: { width: 640, height: 480 },
+  neumorphic: { width: 520, height: 460 },
+  synthwave: { width: 640, height: 480 },
+  eco: { width: 540, height: 500 },
+  plasma: { width: 600, height: 500 },
+  hologram: { width: 700, height: 540 },
+  liquid: { width: 560, height: 520 },
+  gaming: { width: 680, height: 480 },
+  hyperspace: { width: 720, height: 500 },
+};
+
+export default function App() {
+  const [config, setConfig] = useState<NormalizedConfig | null>(null);
+  const state = useInstaller(config);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const raw = await invoke<InstallerConfig>("get_app_config");
+        const normalized = normalizeConfig(raw);
+        setConfig(normalized);
+
+        const dims =
+          THEME_DIMENSIONS[normalized.theme] || THEME_DIMENSIONS.aurora;
+        const appWindow = getCurrentWindow();
+
+        // Dynamic resize and center based on theme
+        await appWindow.setSize(new LogicalSize(dims.width, dims.height));
+        await appWindow.center();
+        await appWindow.show();
+      } catch (e) {
+        console.error("加载安装器配置失败", e);
+      }
+    })();
+  }, []);
+
+  if (!config) return null;
+
+  const ThemeComponent = resolveTheme(config.theme);
+  return (
+    <Suspense fallback={null}>
+      <ThemeComponent config={config} state={state} />
+    </Suspense>
+  );
+}

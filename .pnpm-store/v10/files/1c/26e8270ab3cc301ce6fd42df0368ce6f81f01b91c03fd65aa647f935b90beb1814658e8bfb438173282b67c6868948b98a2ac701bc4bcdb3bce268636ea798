@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+// 把 assets/logo.svg 转成 1024×1024 PNG，再调 tauri icon 生成全套平台图标
+// 用法: npm run gen-icons
+
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, "..");
+
+async function main() {
+  const sharp = (await import("sharp")).default;
+  const svgPath = path.join(ROOT, "assets", "logo.svg");
+  const pngPath = path.join(ROOT, "assets", "logo-1024.png");
+
+  if (!fs.existsSync(svgPath)) {
+    console.error(`找不到 ${svgPath}`);
+    process.exit(1);
+  }
+
+  console.log("[gen-icons] 渲染 SVG → 1024×1024 PNG ...");
+  await sharp(svgPath).resize(1024, 1024).png().toFile(pngPath);
+
+  // 1) 给前端用的 logo（src/assets/icon.png）
+  const frontendIcon = path.join(ROOT, "src", "assets", "icon.png");
+  await sharp(svgPath).resize(256, 256).png().toFile(frontendIcon);
+  console.log(`[gen-icons] 已写入 ${path.relative(ROOT, frontendIcon)}`);
+
+  // 2) 调 tauri icon 生成全套（含 .ico / .icns / Square*.png 等）
+  console.log("[gen-icons] 调 tauri icon 生成全套平台图标 ...");
+  const r = spawnSync(
+    process.platform === "win32" ? "npx.cmd" : "npx",
+    ["tauri", "icon", pngPath],
+    { cwd: ROOT, shell: process.platform === "win32", stdio: "inherit" },
+  );
+  if (r.status !== 0) {
+    console.error("[gen-icons] tauri icon 失败");
+    process.exit(r.status ?? 1);
+  }
+
+  console.log("[gen-icons] ✓ 图标生成完成");
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

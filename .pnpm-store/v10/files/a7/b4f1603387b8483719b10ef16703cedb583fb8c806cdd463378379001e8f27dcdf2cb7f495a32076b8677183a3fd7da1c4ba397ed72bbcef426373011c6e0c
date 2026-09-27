@@ -1,0 +1,29 @@
+{
+  "name": "hello-electron",
+  "productName": "HelloElectron",
+  "version": "1.0.0",
+  "description": "fancy-installer 的最小可工作 Electron 示例",
+  "main": "main.js",
+  "author": { "name": "fancy-installer contributors" },
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build:unpack": "electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^32.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.fancyinstaller.hello-electron",
+    "productName": "HelloElectron",
+    "publisherName": "fancy-installer demo",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": "dir"
+    }
+  }
+}

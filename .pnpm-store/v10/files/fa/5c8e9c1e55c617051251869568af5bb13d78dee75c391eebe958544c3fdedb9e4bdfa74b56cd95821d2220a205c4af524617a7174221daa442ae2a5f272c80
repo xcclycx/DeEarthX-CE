@@ -1,0 +1,34 @@
+{
+  "productName": "FancyApp",
+  "version": "1.0.0",
+  "identifier": "com.fancyinstaller.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Fancy App 安装程序",
+        "width": 440,
+        "height": 510,
+        "decorations": false,
+        "transparent": true,
+        "resizable": false,
+        "shadow": false,
+        "center": true,
+        "visible": false
+      }
+    ],
+    "security": {
+      "capabilities": ["default"]
+    }
+  },
+  "bundle": {
+    "active": false,
+    "targets": []
+  }
+}

@@ -1,0 +1,120 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./hologram.css";
+
+export default function HologramTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center holo-root">
+      
+      {/* 3D 浮动全息投影仪容器 */}
+      <div className="holo-projector glass-draggable">
+        
+        {/* 全息扫描扫描线 */}
+        <div className="holo-scanner" />
+        <div className="holo-grid-bg" />
+
+        <header data-tauri-drag-region>
+          <div className="holo-brand">
+            <img src={logo} alt="Logo" className="holo-logo" />
+            <span className="holo-text-flicker">PROJECTION: {config.appDisplayName}</span>
+          </div>
+          <button className="holo-close" onClick={state.close}>[ABORT]</button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="holo-step holo-anim-glitch">
+              <div className="holo-hero">
+                <h1 className="holo-title">{texts.welcomeTitle}</h1>
+                <p className="holo-desc">{texts.welcomeSubtitle}</p>
+              </div>
+
+              <div className="holo-form">
+                <label>&gt; TARGET_COORDINATES</label>
+                <div className="holo-input-box" onClick={state.selectPath}>
+                  <div className="holo-path">{installPath}</div>
+                  <button className="holo-btn-sm">CALIBRATE</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="holo-step holo-anim-glitch holo-center">
+              <div className="holo-data-ring">
+                <div className="holo-ring-outer" style={{ transform: `rotate(${progress * 3.6}deg)` }}></div>
+                <div className="holo-ring-inner">
+                  <div className="holo-percent">{progress}%</div>
+                </div>
+              </div>
+              
+              <div className="holo-status">
+                <span className="holo-blink">_</span> {getStatusText()}
+              </div>
+              
+              {/* 装饰性数据流 */}
+              <div className="holo-data-stream">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="holo-data-line" style={{ width: `${Math.random() * 100}%`, animationDelay: `${i*0.2}s` }} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="holo-step holo-anim-glitch">
+              <div className="holo-hero">
+                <div className="holo-icon-success">
+                  <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="M22 4L12 14.01l-3-3" />
+                  </svg>
+                </div>
+                <h1 className="holo-title" style={{ color: '#00ffcc' }}>{texts.successTitle}</h1>
+                <p className="holo-desc">{texts.successSubtitle}</p>
+              </div>
+
+              <div className="holo-modules">
+                <p style={{ color: 'var(--holo-cyan)', fontSize: '12px' }}>&gt; LOADED_MODULES:</p>
+                {texts.features.map(f => (
+                  <div key={f.label} className="holo-module-item">
+                    {f.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+
+        <footer>
+          {step === 1 && (
+            <>
+              <a href="#" className="holo-link">{texts.licenseAgreement}</a>
+              <button className="holo-btn" onClick={state.startInstall}>
+                <div className="holo-btn-corner" />
+                {texts.installButton}
+              </button>
+            </>
+          )}
+          {step === 3 && (
+            <button className="holo-btn holo-btn-full" onClick={state.launch}>
+              <div className="holo-btn-corner" />
+              {texts.launchButton}
+            </button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}

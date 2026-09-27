@@ -1,0 +1,35 @@
+{
+  "appName": "FancyApp",
+  "appDisplayName": "Fancy App",
+  "appPublisher": "Fancy Inc.",
+  "appVersion": "1.0.0",
+  "exeName": "FancyApp.exe",
+  "appDescription": "Fancy App - 由 fancy-installer 驱动",
+  "appIdentifier": "com.fancyapp.installer",
+
+  "theme": "plasma",
+  "primaryColor": "#f43f5e",
+  "accentColor": "#06b6d4",
+  "successColor": "#10b981",
+
+  "texts": {
+    "welcomeTitle": "欢迎安装",
+    "welcomeSubtitle": "极速、轻巧、即开即用。即将在您的电脑上完成部署。",
+    "installButton": "开始安装",
+    "licenseAgreement": "《许可协议及隐私条款》",
+    "progressFrames": [
+      { "limit": 25, "text": "正在准备运行环境..." },
+      { "limit": 55, "text": "正在解压程序文件..." },
+      { "limit": 80, "text": "正在写入配置..." },
+      { "limit": 100, "text": "正在完成最后步骤..." }
+    ],
+    "successTitle": "安装成功",
+    "successSubtitle": "一切准备就绪，可以开启应用了",
+    "features": [
+      { "label": "极速启动", "color": "#10b981" },
+      { "label": "智能更新", "color": "#06b6d4" },
+      { "label": "安全可靠", "color": "#a78bfa" }
+    ],
+    "launchButton": "立即启动"
+  }
+}

@@ -1,0 +1,373 @@
+/* Plasma 动态能量流体主题 */
+
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&display=swap');
+
+.plasma-root {
+  font-family: 'Exo 2', sans-serif;
+  color: #ffffff;
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 极致的纯 CSS 动态流体背景 */
+.plasma-bg-layer {
+  position: absolute;
+  top: -20%; left: -20%; right: -20%; bottom: -20%;
+  background-color: #0b001a;
+  z-index: 0;
+  filter: blur(60px);
+  overflow: hidden;
+}
+
+.plasma-blob {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  animation: plasmaMove 15s infinite alternate;
+}
+
+.plasma-blob-1 {
+  width: 80%; height: 80%;
+  background: radial-gradient(circle, #6a00ff 0%, transparent 70%);
+  top: 0; left: 0;
+  animation-duration: 20s;
+}
+
+.plasma-blob-2 {
+  width: 70%; height: 70%;
+  background: radial-gradient(circle, #ff007b 0%, transparent 70%);
+  bottom: 0; right: 0;
+  animation-duration: 25s;
+  animation-direction: alternate-reverse;
+}
+
+.plasma-blob-3 {
+  width: 90%; height: 90%;
+  background: radial-gradient(circle, #00f0ff 0%, transparent 70%);
+  top: 20%; left: 10%;
+  animation-duration: 30s;
+  opacity: 0.8;
+}
+
+@keyframes plasmaMove {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(10%, 15%) scale(1.2) rotate(90deg); }
+  100% { transform: translate(-10%, 10%) scale(0.9) rotate(180deg); }
+}
+
+/* 玻璃容器 */
+.plasma-window {
+  width: 600px;
+  height: 500px;
+  background: rgba(15, 5, 30, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+header {
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  -webkit-app-region: drag;
+}
+
+.plasma-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.plasma-logo {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 5px #00f0ff);
+}
+
+.plasma-close {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 20px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+.plasma-close:hover {
+  color: #fff;
+  text-shadow: 0 0 10px #ff007b;
+}
+
+main {
+  flex: 1;
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.plasma-step {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.plasma-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.plasma-anim {
+  animation: plasmaFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes plasmaFadeUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); filter: blur(10px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.plasma-title {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 16px;
+  background: linear-gradient(90deg, #fff, #00f0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+}
+
+.plasma-desc {
+  font-size: 16px;
+  color: rgba(255,255,255,0.7);
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+
+/* 输入框 */
+.plasma-form {
+  margin-top: auto;
+}
+
+.plasma-label {
+  font-size: 12px;
+  color: #00f0ff;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.plasma-input-box {
+  display: flex;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 12px;
+  padding: 8px 8px 8px 16px;
+  align-items: center;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: all 0.3s;
+  box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.05);
+}
+.plasma-input-box:hover {
+  border-color: #00f0ff;
+  box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1), 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.plasma-path {
+  flex: 1;
+  font-family: monospace;
+  color: #fff;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plasma-btn-sm {
+  background: rgba(0, 240, 255, 0.1);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.5);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.plasma-btn-sm:hover {
+  background: #00f0ff;
+  color: #000;
+  box-shadow: 0 0 15px #00f0ff;
+}
+
+/* 能量核心与进度条 */
+.plasma-energy-core {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.plasma-core-ring {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #00f0ff 0%, transparent 60%);
+  filter: blur(10px);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.plasma-percent {
+  font-size: 42px;
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 20px #00f0ff;
+}
+
+.plasma-progress-container {
+  width: 100%;
+  text-align: center;
+}
+
+.plasma-progress-bar {
+  height: 12px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.plasma-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6a00ff, #00f0ff);
+  border-radius: 6px;
+  position: relative;
+  transition: width 0.1s linear;
+}
+
+.plasma-energy-pulse {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  animation: energyPulse 1s linear infinite;
+}
+@keyframes energyPulse {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.plasma-status {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 1px;
+}
+
+/* 成功特效 */
+.plasma-success-orb {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff007b, transparent 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 0 30px #ff007b;
+  animation: pulseOrb 2s infinite alternate;
+}
+@keyframes pulseOrb {
+  0% { box-shadow: 0 0 20px #ff007b; transform: scale(0.95); }
+  100% { box-shadow: 0 0 50px #ff007b; transform: scale(1.05); }
+}
+
+.plasma-features {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.plasma-feature-chip {
+  background: rgba(255,0,123,0.1);
+  border: 1px solid rgba(255,0,123,0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(255,0,123,0.2);
+}
+
+/* Footer */
+footer {
+  padding: 20px 40px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.plasma-link {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.plasma-link:hover {
+  color: #00f0ff;
+}
+
+.plasma-btn {
+  background: linear-gradient(45deg, #6a00ff, #ff007b);
+  border: none;
+  padding: 2px; /* For animated border effect */
+  border-radius: 24px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(106, 0, 255, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.plasma-btn span {
+  display: block;
+  background: #0f051e; /* Inner dark background */
+  padding: 12px 32px;
+  border-radius: 22px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+}
+
+.plasma-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(255, 0, 123, 0.5);
+}
+
+.plasma-btn:hover span {
+  background: transparent; /* Reveal gradient */
+}
+
+.plasma-btn-wide {
+  width: 100%;
+}

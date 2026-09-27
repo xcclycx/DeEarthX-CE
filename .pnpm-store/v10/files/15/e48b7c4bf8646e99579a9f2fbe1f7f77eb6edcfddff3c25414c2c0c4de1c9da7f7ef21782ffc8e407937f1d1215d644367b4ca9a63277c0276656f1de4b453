@@ -1,0 +1,366 @@
+/* Geist 主题 —— Vercel/Linear 风格现代暗黑风 */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+.geist-root {
+  --g-bg-base: transparent;
+  --g-card-bg: #000000;
+  --g-border: #333333;
+  --g-border-hover: #444444;
+  --g-text: #ededed;
+  --g-text-muted: #a1a1aa;
+  --g-btn-bg: #ffffff;
+  --g-btn-text: #000000;
+  --g-btn-hover: #e5e5e5;
+  --g-input-bg: #0a0a0a;
+
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  background: var(--g-bg-base);
+  color: var(--g-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.geist-card {
+  width: 440px;
+  height: 340px;
+  background: var(--g-card-bg);
+  border: 1px solid var(--g-border);
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.geist-glow {
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  box-shadow: 0 0 12px 1px rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.geist-card header {
+  height: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--g-border);
+  -webkit-app-region: drag;
+}
+
+.geist-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.geist-logo-wrap {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--g-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+}
+
+.geist-brand img {
+  width: 14px;
+  height: 14px;
+}
+
+.geist-version {
+  font-size: 11px;
+  color: var(--g-text-muted);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+
+.geist-close {
+  background: transparent;
+  border: none;
+  color: var(--g-text-muted);
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-app-region: no-drag;
+}
+
+.geist-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--g-text);
+}
+
+.geist-card main {
+  flex: 1;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.geist-step {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.geist-center {
+  justify-content: center;
+}
+
+.geist-fade-up {
+  animation: geistFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes geistFade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.geist-step h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.geist-sub {
+  font-size: 13px;
+  color: var(--g-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.geist-spacer {
+  flex: 1;
+}
+
+.geist-form-group {
+  margin-top: auto;
+}
+
+.geist-form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--g-text-muted);
+  margin-bottom: 8px;
+}
+
+.geist-input-box {
+  display: flex;
+  align-items: center;
+  background: var(--g-input-bg);
+  border: 1px solid var(--g-border);
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  -webkit-app-region: no-drag;
+}
+
+.geist-input-box:hover {
+  border-color: var(--g-border-hover);
+}
+
+.geist-path {
+  flex: 1;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  padding: 0 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--g-text);
+}
+
+.geist-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid transparent;
+  color: var(--g-text);
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.geist-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Spinner & Progress */
+.geist-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.geist-spinner {
+  width: 24px;
+  height: 24px;
+  color: var(--g-text-muted);
+  animation: geistSpin 1.5s linear infinite;
+}
+
+@keyframes geistSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.geist-progress-track {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.geist-progress-fill {
+  height: 100%;
+  background: var(--g-text);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.geist-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.geist-status {
+  color: var(--g-text-muted);
+}
+.geist-percent {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--g-text);
+}
+
+/* Success */
+.geist-success-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--g-text);
+  margin-bottom: 16px;
+}
+
+.geist-success-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.geist-features {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.geist-feature-chip {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--g-border);
+  background: var(--g-input-bg);
+}
+
+.geist-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Footer */
+.geist-card footer {
+  padding: 16px 32px;
+  border-top: 1px solid var(--g-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.geist-link {
+  font-size: 12px;
+  color: var(--g-text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.geist-link:hover {
+  color: var(--g-text);
+}
+
+.geist-muted-text {
+  font-size: 12px;
+  color: var(--g-text-muted);
+}
+
+.geist-btn-primary {
+  background: var(--g-btn-bg);
+  color: var(--g-btn-text);
+  border: none;
+  border-radius: 6px;
+  padding: 0 16px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
+}
+
+.geist-btn-primary:hover {
+  background: var(--g-btn-hover);
+}
+
+.geist-btn-primary:active {
+  transform: scale(0.98);
+}

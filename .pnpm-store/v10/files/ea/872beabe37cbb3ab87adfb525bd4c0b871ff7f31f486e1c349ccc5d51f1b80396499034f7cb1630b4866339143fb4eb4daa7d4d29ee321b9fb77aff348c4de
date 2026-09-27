@@ -1,0 +1,109 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./plasma.css";
+
+export default function PlasmaTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center plasma-root">
+      {/* 复杂的动态流体背景层 */}
+      <div className="plasma-bg-layer">
+        <div className="plasma-blob plasma-blob-1"></div>
+        <div className="plasma-blob plasma-blob-2"></div>
+        <div className="plasma-blob plasma-blob-3"></div>
+      </div>
+
+      <div className="plasma-window glass-draggable">
+        <header data-tauri-drag-region>
+          <div className="plasma-brand">
+            <img src={logo} alt="Logo" className="plasma-logo" />
+            <span>{config.appDisplayName}</span>
+          </div>
+          <button className="plasma-close" onClick={state.close}>✕</button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="plasma-step plasma-anim">
+              <h1 className="plasma-title">{texts.welcomeTitle}</h1>
+              <p className="plasma-desc">{texts.welcomeSubtitle}</p>
+              
+              <div className="plasma-form">
+                <div className="plasma-label">Destination Node:</div>
+                <div className="plasma-input-box" onClick={state.selectPath}>
+                  <div className="plasma-path">{installPath}</div>
+                  <button className="plasma-btn-sm">RE-ROUTE</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="plasma-step plasma-anim plasma-center">
+              <div className="plasma-energy-core">
+                <div className="plasma-core-ring" style={{ transform: `scale(${1 + progress/200})`, opacity: progress/100 }}></div>
+                <div className="plasma-percent">{progress}%</div>
+              </div>
+              
+              <div className="plasma-progress-container">
+                <div className="plasma-progress-bar">
+                  <div className="plasma-progress-fill" style={{ width: `${progress}%` }}>
+                    <div className="plasma-energy-pulse"></div>
+                  </div>
+                </div>
+                <div className="plasma-status">{getStatusText()}</div>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="plasma-step plasma-anim">
+              <div className="plasma-success-orb">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <path d="M22 4L12 14.01l-3-3" />
+                </svg>
+              </div>
+              <h1 className="plasma-title">{texts.successTitle}</h1>
+              <p className="plasma-desc">{texts.successSubtitle}</p>
+
+              <div className="plasma-features">
+                {texts.features.map(f => (
+                  <div key={f.label} className="plasma-feature-chip">
+                    {f.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+
+        <footer>
+          {step === 1 && (
+            <>
+              <a href="#" className="plasma-link">Decrypt {texts.licenseAgreement}</a>
+              <button className="plasma-btn" onClick={state.startInstall}>
+                <span>{texts.installButton}</span>
+              </button>
+            </>
+          )}
+          {step === 3 && (
+            <button className="plasma-btn plasma-btn-wide" onClick={state.launch}>
+              <span>{texts.launchButton}</span>
+            </button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}

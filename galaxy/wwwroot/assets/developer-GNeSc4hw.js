@@ -1,0 +1,1 @@
+import{s as a}from"./index-YDSTuOx6.js";async function o(e){return(await a.post("/developer/apply",e)).data}async function p(){return(await a.get("/developer/status")).data}async function i(){return(await a.get("/admin/developers")).data}async function c(e,t,r){return(await a.put(`/admin/developers/${e}/review`,{approved:t,reviewNote:r})).data}export{o as a,i as b,p as g,c as r};

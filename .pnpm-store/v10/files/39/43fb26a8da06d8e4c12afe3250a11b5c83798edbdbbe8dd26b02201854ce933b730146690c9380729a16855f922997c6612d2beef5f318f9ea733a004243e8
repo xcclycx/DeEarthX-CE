@@ -1,0 +1,136 @@
+/* Aurora 主题 —— 极光玻璃拟态 */
+
+.aurora-root {
+  --cubic: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes float-glow {
+  0% { transform: translate(0, 0) scale(0.95); }
+  100% { transform: translate(20px, -20px) scale(1.05); }
+}
+
+@keyframes aurora-drift-1 {
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(50px, -30px) scale(1.2); }
+  50% { transform: translate(-20px, -50px) scale(0.85); }
+  75% { transform: translate(-40px, 20px) scale(1.15); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes aurora-drift-2 {
+  0% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-35px, 35px) scale(1.15); }
+  50% { transform: translate(25px, 50px) scale(0.8); }
+  75% { transform: translate(40px, -20px) scale(1.2); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes aurora-drift-3 {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  25% { transform: translate(-35%, -65%) scale(1.3); }
+  50% { transform: translate(-65%, -35%) scale(0.75); }
+  75% { transform: translate(-40%, -55%) scale(1.2); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes bounceSpectrum {
+  0% { transform: scaleY(0.15); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0.15); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes corePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.85; }
+}
+
+/* shimmer 扫光按钮 */
+.shimmer-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  animation: shimmerSweep 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmerSweep {
+  0% { left: -60%; }
+  60% { left: 120%; }
+  100% { left: 120%; }
+}
+
+/* hover 态 */
+.path-slot:hover {
+  background: color-mix(in srgb, var(--theme-primary) 8%, transparent) !important;
+  border-color: color-mix(in srgb, var(--theme-primary) 35%, transparent) !important;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--theme-primary) 8%, transparent),
+    inset 0 0 12px color-mix(in srgb, var(--theme-primary) 5%, transparent);
+}
+
+.path-change-btn:hover {
+  color: var(--theme-primary) !important;
+}
+
+.start-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.launch-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.close-btn:hover {
+  background: color-mix(in srgb, var(--theme-primary) 25%, transparent) !important;
+}
+
+/* 顶部光线 */
+.installer-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 70%;
+  height: 2px;
+  z-index: 110;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--theme-primary),
+    transparent
+  );
+  animation: bounceSpectrum 2s var(--cubic) infinite alternate;
+}
+
+/* 拖拽区域 */
+.glass-draggable {
+  -webkit-app-region: drag;
+}
+.glass-draggable button,
+.glass-draggable a,
+.glass-draggable input,
+.path-slot {
+  -webkit-app-region: no-drag;
+}

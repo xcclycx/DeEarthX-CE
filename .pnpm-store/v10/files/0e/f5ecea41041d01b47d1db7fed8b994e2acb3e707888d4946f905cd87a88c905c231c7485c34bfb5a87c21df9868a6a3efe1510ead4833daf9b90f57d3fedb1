@@ -1,0 +1,116 @@
+import { useEffect, useState, useCallback } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { open } from "@tauri-apps/plugin-dialog";
+import type { InstallerState, NormalizedConfig } from "./types";
+
+const appWindow = getCurrentWebviewWindow();
+
+/**
+ * 主题无关的安装器状态管理：步骤切换、路径选择、进度订阅、启动应用。
+ * 所有主题共用这一份逻辑，主题只负责 UI 呈现。
+ */
+export function useInstaller(config: NormalizedConfig | null): InstallerState {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [progress, setProgress] = useState(0);
+  const [installPath, setInstallPath] = useState("");
+
+  // 默认安装路径（来自 Rust）
+  useEffect(() => {
+    if (!config) return;
+    (async () => {
+      try {
+        const dir = await invoke<string>("default_install_dir");
+        setInstallPath(dir);
+      } catch (e) {
+        console.error("default_install_dir 失败", e);
+      }
+    })();
+  }, [config]);
+
+  // 进度事件订阅
+  useEffect(() => {
+    const unlisten = listen<number>("install-progress", (event) => {
+      setProgress(event.payload);
+      if (event.payload === 100) {
+        setTimeout(() => setStep(3), 600);
+      }
+    });
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, []);
+
+  const selectPath = useCallback(async () => {
+    if (!config) return;
+    if (step !== 1) return;
+    const folder = config.appName || "App";
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        defaultPath: installPath,
+      });
+      if (!selected) return;
+      const chosen = selected as string;
+      const sep = chosen.includes("\\") ? "\\" : "/";
+      const segs = chosen.split(/[\\/]/).filter(Boolean);
+      const last = segs[segs.length - 1] ?? "";
+      if (last.toLowerCase() === folder.toLowerCase()) {
+        setInstallPath(chosen);
+        return;
+      }
+      try {
+        const [exists, isEmpty] = await invoke<[boolean, boolean]>(
+          "check_dir_status",
+          { path: chosen },
+        );
+        setInstallPath(
+          exists && isEmpty
+            ? chosen
+            : chosen.replace(/[\\/]+$/, "") + sep + folder,
+        );
+      } catch {
+        setInstallPath(chosen.replace(/[\\/]+$/, "") + sep + folder);
+      }
+    } catch (err) {
+      console.error("对话框启动失败", err);
+    }
+  }, [config, step, installPath]);
+
+  const startInstall = useCallback(async () => {
+    setStep(2);
+    try {
+      await invoke("run_installation", { path: installPath });
+    } catch (e) {
+      console.error(e);
+    }
+  }, [installPath]);
+
+  const launch = useCallback(async () => {
+    try {
+      await invoke("launch_app");
+    } catch (e) {
+      console.error(e);
+    }
+    setTimeout(() => {
+      appWindow.close();
+    }, 400);
+  }, []);
+
+  const close = useCallback(async () => {
+    await appWindow.close();
+  }, []);
+
+  return {
+    step,
+    progress,
+    installPath,
+    setInstallPath,
+    selectPath,
+    startInstall,
+    launch,
+    close,
+  };
+}

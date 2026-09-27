@@ -1,0 +1,149 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./minimal.css";
+
+/**
+ * Minimal 主题 —— 干净、克制、品牌中性。
+ * 适合做企业级应用、内部工具的安装器。
+ */
+export default function MinimalTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { primaryColor, successColor, texts } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error -- CSS 自定义属性
+    "--theme-primary": primaryColor,
+    "--theme-success": successColor,
+  };
+
+  return (
+    <div
+      className="w-screen h-screen flex justify-center items-center minimal-root"
+      style={cssVars}
+    >
+      <div className="minimal-card glass-draggable" data-step={step}>
+        {/* 头部 */}
+        <header data-tauri-drag-region>
+          <div className="minimal-brand" data-tauri-drag-region>
+            <img src={logo} alt="" />
+            <span>{config.appDisplayName}</span>
+          </div>
+          <button className="minimal-close" onClick={state.close} aria-label="close">
+            ×
+          </button>
+        </header>
+
+        {/* 进度条贯穿三步 */}
+        <div className="minimal-progress-track">
+          <div
+            className="minimal-progress-fill"
+            style={{
+              width:
+                step === 1 ? "0%" : step === 2 ? `${progress}%` : "100%",
+            }}
+          />
+        </div>
+
+        <main>
+          {step === 1 && (
+            <div className="minimal-step minimal-step-1">
+              <h1>{texts.welcomeTitle}</h1>
+              <p className="minimal-sub">{texts.welcomeSubtitle}</p>
+
+              <label className="minimal-path">
+                <span className="minimal-path-label">安装位置</span>
+                <button
+                  className="minimal-path-input"
+                  onClick={state.selectPath}
+                  title={installPath}
+                >
+                  <span>{installPath}</span>
+                  <span className="minimal-path-pick">选择…</span>
+                </button>
+              </label>
+
+              <div className="minimal-meta">
+                <span>版本 {config.appVersion}</span>
+                <span>·</span>
+                <span>{config.appPublisher}</span>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="minimal-step minimal-step-2">
+              <div className="minimal-spinner" aria-hidden />
+              <div className="minimal-percent">{progress}%</div>
+              <div className="minimal-status">{getStatusText()}</div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="minimal-step minimal-step-3">
+              <div className="minimal-check">
+                <svg viewBox="0 0 52 52" width="56" height="56">
+                  <circle
+                    cx="26"
+                    cy="26"
+                    r="23"
+                    fill="none"
+                    stroke={successColor}
+                    strokeWidth="2"
+                    className="minimal-check-circle"
+                  />
+                  <path
+                    d="M14 27 L23 36 L39 18"
+                    fill="none"
+                    stroke={successColor}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="minimal-check-tick"
+                  />
+                </svg>
+              </div>
+              <h2>{texts.successTitle}</h2>
+              <p className="minimal-sub">{texts.successSubtitle}</p>
+
+              {texts.features.length > 0 && (
+                <ul className="minimal-features">
+                  {texts.features.map((f) => (
+                    <li key={f.label} style={{ ["--chip" as any]: f.color }}>
+                      {f.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </main>
+
+        <footer>
+          {step === 1 && (
+            <>
+              <button className="minimal-btn minimal-btn-primary" onClick={state.startInstall}>
+                {texts.installButton}
+              </button>
+              <a className="minimal-license" href="#">
+                {texts.licenseAgreement}
+              </a>
+            </>
+          )}
+          {step === 3 && (
+            <button className="minimal-btn minimal-btn-success" onClick={state.launch}>
+              {texts.launchButton}
+            </button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}

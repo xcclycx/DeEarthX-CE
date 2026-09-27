@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DeEarthX.Infrastructure\DeEarthX.Infrastructure.csproj" />
+    <ProjectReference Include="..\DeEarthX.Core\DeEarthX.Core.csproj" />
+    <ProjectReference Include="..\DeEarthX.Realtime\DeEarthX.Realtime.csproj" />
+  </ItemGroup>
+</Project>

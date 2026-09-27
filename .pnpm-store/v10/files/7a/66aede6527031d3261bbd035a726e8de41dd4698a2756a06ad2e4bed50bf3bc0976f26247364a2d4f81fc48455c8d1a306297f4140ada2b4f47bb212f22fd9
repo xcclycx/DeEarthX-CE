@@ -1,0 +1,122 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./liquid.css";
+
+export default function LiquidTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts, primaryColor } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error
+    "--lq-primary": primaryColor,
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center lq-root" style={cssVars}>
+      
+      {/* 液体背景层：利用 SVG Gooey 滤镜实现粘稠融合效果 */}
+      <svg width="0" height="0" className="lq-svg-filter">
+        <filter id="goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+          <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+        </filter>
+      </svg>
+
+      <div className="lq-bg-container">
+        <div className="lq-blob lq-blob-1"></div>
+        <div className="lq-blob lq-blob-2"></div>
+        <div className="lq-blob lq-blob-3"></div>
+      </div>
+
+      <div className="lq-window glass-draggable">
+        <header data-tauri-drag-region>
+          <div className="lq-brand">
+            <img src={logo} alt="Logo" />
+            <span>{config.appDisplayName}</span>
+          </div>
+          <button className="lq-close" onClick={state.close}>
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="lq-step lq-anim">
+              <div className="lq-hero">
+                <h1>{texts.welcomeTitle}</h1>
+                <p>{texts.welcomeSubtitle}</p>
+              </div>
+
+              <div className="lq-form">
+                <label>Installation Path</label>
+                <div className="lq-input-group" onClick={state.selectPath}>
+                  <div className="lq-path">{installPath}</div>
+                  <div className="lq-btn-sm">Change</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="lq-step lq-anim lq-center">
+              {/* 波浪形液体填充进度条 */}
+              <div className="lq-progress-orb">
+                <div className="lq-liquid" style={{ top: `${100 - progress}%` }}>
+                  <div className="lq-wave lq-wave-1"></div>
+                  <div className="lq-wave lq-wave-2"></div>
+                </div>
+                <div className="lq-percent">{progress}%</div>
+              </div>
+              <div className="lq-status">{getStatusText()}</div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="lq-step lq-anim">
+              <div className="lq-hero lq-center">
+                <div className="lq-success-icon">
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </div>
+                <h1>{texts.successTitle}</h1>
+                <p>{texts.successSubtitle}</p>
+              </div>
+
+              <div className="lq-features">
+                {texts.features.map((f, i) => (
+                  <div key={f.label} className="lq-feature-bubble" style={{ animationDelay: `${i * 0.15}s` }}>
+                    {f.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+
+        <footer>
+          {step === 1 && (
+            <>
+              <a href="#" className="lq-link">{texts.licenseAgreement}</a>
+              <button className="lq-btn" onClick={state.startInstall}>{texts.installButton}</button>
+            </>
+          )}
+          {step === 3 && (
+            <button className="lq-btn lq-btn-full" onClick={state.launch}>{texts.launchButton}</button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}

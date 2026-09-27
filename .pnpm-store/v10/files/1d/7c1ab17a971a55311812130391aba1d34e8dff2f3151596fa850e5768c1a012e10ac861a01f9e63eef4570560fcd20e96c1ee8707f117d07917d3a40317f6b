@@ -1,0 +1,67 @@
+// Linux 实现：把 AppImage / 解压目录放到 ~/.local/share/<AppName>，
+// 写一个 .desktop 文件到 ~/.local/share/applications/。
+
+use std::env;
+use std::fs;
+use std::path::PathBuf;
+use std::process::Command;
+use tauri::{AppHandle, Manager};
+
+use super::{InstallContext, LogFn};
+
+pub fn default_install_root(app: &AppHandle, app_name: &str) -> Result<PathBuf, String> {
+    let base = app.path().local_data_dir().map_err(|e| e.to_string())?;
+    Ok(base.join(app_name))
+}
+
+pub fn install_finalize(ctx: &InstallContext, log: LogFn) {
+    let home = match env::var("HOME") {
+        Ok(h) => PathBuf::from(h),
+        Err(_) => {
+            log("无法读取 $HOME，跳过 .desktop 注册".to_string());
+            return;
+        }
+    };
+    let desktop_dir = home.join(".local").join("share").join("applications");
+    if let Err(e) = fs::create_dir_all(&desktop_dir) {
+        log(format!("创建 {} 失败: {e}", desktop_dir.display()));
+        return;
+    }
+    let exe_path = ctx.install_dir.join(ctx.exe_name);
+    let icon_path = ctx.install_dir.join("resources").join("icon.png"); // electron-builder 默认
+    let desktop_entry = format!(
+        "[Desktop Entry]\n\
+         Type=Application\n\
+         Name={display}\n\
+         Comment={publisher}\n\
+         Exec=\"{exe}\"\n\
+         Icon={icon}\n\
+         Categories=Utility;\n\
+         Terminal=false\n",
+        display = ctx.app_display_name,
+        publisher = ctx.app_publisher,
+        exe = exe_path.display(),
+        icon = icon_path.display(),
+    );
+    let target = desktop_dir.join(format!("{}.desktop", ctx.app_name));
+    if let Err(e) = fs::write(&target, desktop_entry) {
+        log(format!("写入 .desktop 失败: {e}"));
+        return;
+    }
+    log(format!(".desktop 已写入 {}", target.display()));
+}
+
+pub fn launch_installed_app(
+    app: &AppHandle,
+    app_name: &str,
+    exe_name: &str,
+) -> Result<(), String> {
+    let exe = default_install_root(app, app_name)?.join(exe_name);
+    if !exe.exists() {
+        return Err(format!("找不到已安装的程序：{}", exe.display()));
+    }
+    Command::new(&exe)
+        .spawn()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}

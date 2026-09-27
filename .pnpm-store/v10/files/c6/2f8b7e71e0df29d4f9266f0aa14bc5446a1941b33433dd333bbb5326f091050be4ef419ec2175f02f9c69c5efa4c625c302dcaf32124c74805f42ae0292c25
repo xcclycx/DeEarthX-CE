@@ -1,0 +1,113 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./neumorphic.css";
+
+export default function NeumorphicTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts, primaryColor } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error
+    "--neu-primary": primaryColor,
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center neu-root" style={cssVars}>
+      <div className="neu-window glass-draggable">
+        
+        <header data-tauri-drag-region>
+          <div className="neu-brand">
+            <div className="neu-icon-wrap">
+              <img src={logo} alt="logo" />
+            </div>
+            <span>{config.appDisplayName}</span>
+          </div>
+          <button className="neu-btn-icon" onClick={state.close}>
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="neu-step neu-fade">
+              <div className="neu-content">
+                <h1>{texts.welcomeTitle}</h1>
+                <p>{texts.welcomeSubtitle}</p>
+
+                <div className="neu-path-section">
+                  <label>Install Directory</label>
+                  <div className="neu-input-group">
+                    <div className="neu-input" title={installPath}>{installPath}</div>
+                    <button className="neu-btn" onClick={state.selectPath}>Browse</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="neu-footer">
+                <a href="#" className="neu-link">{texts.licenseAgreement}</a>
+                <button className="neu-btn neu-btn-primary" onClick={state.startInstall}>
+                  {texts.installButton}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="neu-step neu-fade neu-center">
+              <div className="neu-progress-ring-container">
+                <div className="neu-progress-ring-inner">
+                  <svg viewBox="0 0 160 160">
+                    <circle cx="80" cy="80" r="70" className="neu-ring-bg" />
+                    <circle 
+                      cx="80" cy="80" r="70" 
+                      className="neu-ring-fill" 
+                      style={{ strokeDashoffset: 439.8 - (439.8 * progress) / 100 }} 
+                    />
+                  </svg>
+                  <div className="neu-percent">{progress}<span>%</span></div>
+                </div>
+              </div>
+              <div className="neu-status">{getStatusText()}</div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="neu-step neu-fade">
+              <div className="neu-content neu-center-content">
+                <div className="neu-success-icon">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </div>
+                <h1>{texts.successTitle}</h1>
+                <p>{texts.successSubtitle}</p>
+
+                <div className="neu-features">
+                  {texts.features.map(f => (
+                    <div key={f.label} className="neu-chip">{f.label}</div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="neu-footer neu-footer-right">
+                <button className="neu-btn neu-btn-primary" onClick={state.launch}>
+                  {texts.launchButton}
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}

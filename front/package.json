@@ -1,0 +1,45 @@
+{
+  "name": "dex-v4-ui",
+  "private": true,
+  "version": "4.0.1-beta",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "build:with-error-handling": "node build-with-error-handling.js",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri-dev": "tauri dev --no-watch",
+    "tauri-build": "tauri build",
+    "build:installer": "node scripts/build-installer.js",
+    "build:release": "npm run tauri-build && npm run build:installer"
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
+    "@tailwindcss/vite": "^4.2.1",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-dialog": "~2",
+    "@tauri-apps/plugin-notification": "^2.3.3",
+    "@tauri-apps/plugin-opener": "^2.5.3",
+    "@tauri-apps/plugin-shell": "^2.3.5",
+    "@tauri-apps/plugin-store": "^2.4.2",
+    "ant-design-vue": "^4.2.6",
+    "axios": "^1.13.6",
+    "router": "^2.2.0",
+    "socket.io-client": "^4.8.1",
+    "tailwindcss": "^4.2.1",
+    "vue": "^3.5.29",
+    "vue-i18n": "^11.2.8",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.10.1",
+    "@tauri-apps/plugin-shell": "^2.3.1",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "tslib": "^2.8.1",
+    "typescript": "~5.6.3",
+    "vite": "^6.4.1",
+    "vue-tsc": "^2.2.12"
+  }
+}

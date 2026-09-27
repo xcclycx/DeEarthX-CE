@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DeEarthX.Core/DeEarthX.Core.csproj" />
+    <Project Path="src/DeEarthX.Dearth/DeEarthX.Dearth.csproj" />
+    <Project Path="src/DeEarthX.Dex/DeEarthX.Dex.csproj" />
+    <Project Path="src/DeEarthX.Galaxy/DeEarthX.Galaxy.csproj" />
+    <Project Path="src/DeEarthX.Infrastructure/DeEarthX.Infrastructure.csproj" />
+    <Project Path="src/DeEarthX.ModLoader/DeEarthX.ModLoader.csproj" />
+    <Project Path="src/DeEarthX.Platform/DeEarthX.Platform.csproj" />
+    <Project Path="src/DeEarthX.Plugins/DeEarthX.Plugins.csproj" />
+    <Project Path="src/DeEarthX.Realtime/DeEarthX.Realtime.csproj" />
+    <Project Path="src/DeEarthX.Templates/DeEarthX.Templates.csproj" />
+    <Project Path="src/DeEarthX.Web/DeEarthX.Web.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,47 @@
+import { lazy } from "react";
+import type { ComponentType } from "react";
+import type { ThemeName, ThemeProps } from "../types";
+
+const AuroraTheme = lazy(() => import("./aurora"));
+const MinimalTheme = lazy(() => import("./minimal"));
+const GeistTheme = lazy(() => import("./geist"));
+const BentoTheme = lazy(() => import("./bento"));
+const CoralTheme = lazy(() => import("./coral"));
+const TitaniumTheme = lazy(() => import("./titanium"));
+const GlassTheme = lazy(() => import("./glass"));
+const NeumorphicTheme = lazy(() => import("./neumorphic"));
+const SynthwaveTheme = lazy(() => import("./synthwave"));
+const EcoTheme = lazy(() => import("./eco"));
+const PlasmaTheme = lazy(() => import("./plasma"));
+const HologramTheme = lazy(() => import("./hologram"));
+const LiquidTheme = lazy(() => import("./liquid"));
+const GamingTheme = lazy(() => import("./gaming"));
+const HyperspaceTheme = lazy(() => import("./hyperspace"));
+
+export const themes: Record<ThemeName, ComponentType<ThemeProps>> = {
+  aurora: AuroraTheme,
+  minimal: MinimalTheme,
+  geist: GeistTheme,
+  bento: BentoTheme,
+  coral: CoralTheme,
+  titanium: TitaniumTheme,
+  glass: GlassTheme,
+  neumorphic: NeumorphicTheme,
+  synthwave: SynthwaveTheme,
+  eco: EcoTheme,
+  plasma: PlasmaTheme,
+  hologram: HologramTheme,
+  liquid: LiquidTheme,
+  gaming: GamingTheme,
+  hyperspace: HyperspaceTheme,
+};
+
+export function resolveTheme(
+  name: string | undefined,
+): ComponentType<ThemeProps> {
+  if (name && name in themes) {
+    return themes[name as ThemeName];
+  }
+  console.warn(`[fancy-installer] 未知主题 "${name}"，回退到 aurora`);
+  return themes.aurora;
+}

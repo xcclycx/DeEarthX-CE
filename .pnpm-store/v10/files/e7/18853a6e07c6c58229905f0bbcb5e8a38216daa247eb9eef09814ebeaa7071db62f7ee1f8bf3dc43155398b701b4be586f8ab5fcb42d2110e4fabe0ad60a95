@@ -1,0 +1,81 @@
+use std::fs;
+use std::path::PathBuf;
+
+fn main() {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let config_path = manifest_dir
+        .parent()
+        .expect("no parent dir")
+        .join("installer.config.json");
+
+    // 默认值（找不到配置文件时使用，保证能编译让开发者看到 UI）
+    let mut app_name = "FancyApp".to_string();
+    let mut app_display_name = "Fancy App".to_string();
+    let mut app_publisher = "Unknown".to_string();
+    let mut app_version = "1.0.0".to_string();
+    let mut exe_name = "FancyApp.exe".to_string();
+    let mut app_description = "fancy-installer".to_string();
+    let mut app_identifier = "com.fancyinstaller.app".to_string();
+
+    if config_path.exists() {
+        let raw = fs::read_to_string(&config_path).expect("read installer.config.json");
+        let v: serde_json::Value = serde_json::from_str(&raw).expect("parse installer.config.json");
+        if let Some(s) = v.get("appName").and_then(|x| x.as_str()) {
+            app_name = s.into();
+        }
+        if let Some(s) = v.get("appDisplayName").and_then(|x| x.as_str()) {
+            app_display_name = s.into();
+        }
+        if let Some(s) = v.get("appPublisher").and_then(|x| x.as_str()) {
+            app_publisher = s.into();
+        }
+        if let Some(s) = v.get("appVersion").and_then(|x| x.as_str()) {
+            app_version = s.into();
+        }
+        if let Some(s) = v.get("exeName").and_then(|x| x.as_str()) {
+            exe_name = s.into();
+        }
+        if let Some(s) = v.get("appDescription").and_then(|x| x.as_str()) {
+            app_description = s.into();
+        }
+        if let Some(s) = v.get("appIdentifier").and_then(|x| x.as_str()) {
+            app_identifier = s.into();
+        }
+        println!("cargo:rerun-if-changed={}", config_path.display());
+    }
+
+    println!("cargo:rustc-env=INSTALLER_APP_NAME={}", app_name);
+    println!("cargo:rustc-env=INSTALLER_APP_DISPLAY_NAME={}", app_display_name);
+    println!("cargo:rustc-env=INSTALLER_APP_PUBLISHER={}", app_publisher);
+    println!("cargo:rustc-env=INSTALLER_APP_VERSION={}", app_version);
+    println!("cargo:rustc-env=INSTALLER_EXE_NAME={}", exe_name);
+    println!("cargo:rustc-env=INSTALLER_APP_DESCRIPTION={}", app_description);
+    println!("cargo:rustc-env=INSTALLER_APP_IDENTIFIER={}", app_identifier);
+
+    // payload 缺失时创建空文件 → 运行时进入演示模式（仅 UI 预览）
+    let payload_dir = manifest_dir.join("payload");
+    let payload_file = payload_dir.join("payload.tar.zst");
+    if !payload_file.exists() {
+        let _ = fs::create_dir_all(&payload_dir);
+        let _ = fs::write(&payload_file, b"");
+        println!(
+            "cargo:warning=payload/payload.tar.zst 缺失，已创建空文件进入演示模式（仅 UI 预览）。"
+        );
+    }
+    println!("cargo:rerun-if-changed={}", payload_file.display());
+
+    // 用我们自己的 app.manifest 覆盖 tauri-build 默认 manifest。
+    // 关键是里面显式声明的 asInvoker，避开 Windows 对 "installer/setup/update" 文件名
+    // 的启发式提权（否则 cargo dev 起不来，会报 os error 740）。
+    let manifest_path = manifest_dir.join("app.manifest");
+    if manifest_path.exists() {
+        println!("cargo:rerun-if-changed={}", manifest_path.display());
+        let manifest_xml = fs::read_to_string(&manifest_path).expect("read app.manifest");
+        let attrs = tauri_build::Attributes::new().windows_attributes(
+            tauri_build::WindowsAttributes::new().app_manifest(manifest_xml),
+        );
+        tauri_build::try_build(attrs).expect("tauri_build failed");
+    } else {
+        tauri_build::build();
+    }
+}

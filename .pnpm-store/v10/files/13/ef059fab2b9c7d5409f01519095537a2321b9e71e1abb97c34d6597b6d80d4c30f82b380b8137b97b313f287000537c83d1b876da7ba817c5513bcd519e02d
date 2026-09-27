@@ -1,0 +1,48 @@
+{
+  "name": "fancy-installer",
+  "private": false,
+  "version": "0.1.0",
+  "description": "A configurable, theme-driven installer for Electron apps. Build a beautiful custom installer in minutes.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "pack": "node scripts/pack.js",
+    "gen-icons": "node scripts/gen-icons.mjs"
+  },
+  "keywords": [
+    "installer",
+    "electron",
+    "tauri",
+    "custom-installer",
+    "windows-installer"
+  ],
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-opener": "^2",
+    "autoprefixer": "^10.5.0",
+    "framer-motion": "^12.39.0",
+    "postcss": "^8.5.15",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@tauri-apps/cli": "^2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "@mongodb-js/zstd": "^2.0.0",
+    "sharp": "^0.34.5",
+    "tar-stream": "^3.1.7",
+    "typescript": "~5.8.3",
+    "vite": "^7.0.4"
+  }
+}

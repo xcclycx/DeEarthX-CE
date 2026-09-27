@@ -1,0 +1,188 @@
+<script lang="ts" setup>
+import { open } from "@tauri-apps/plugin-shell";
+import { ref, onMounted, computed } from "vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+interface VersionInfo {
+    version: string;
+    buildTime: string;
+    author: string;
+}
+
+const currentVersion = ref<string>(t('common.loading'));
+const buildTime = ref<string>('');
+const author = ref<string>('');
+
+async function getVersionFromJson(): Promise<VersionInfo> {
+    try {
+        const response = await fetch('/version.json');
+        if (!response.ok) {
+            throw new Error(t('about.version_file_read_failed'));
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('读取 version.json 失败:', error);
+        return {
+            version: '1.0.0',
+            buildTime: 'Unknown',
+            author: 'DeEarthX Team'
+        };
+    }
+}
+
+async function getCurrentVersion() {
+    const versionInfo = await getVersionFromJson();
+    currentVersion.value = versionInfo.version;
+    buildTime.value = versionInfo.buildTime;
+    author.value = versionInfo.author;
+}
+
+const thanksList = computed(() => {
+  return [
+    {
+      id: "user",
+      name: "天跑",
+      avatar: "./tianpao.jpg",
+      contribution: t('about.contribution_author'),
+      bilibiliUrl: "https://space.bilibili.com/1728953419"
+    },
+    {
+      id: "dev2",
+      name: t('about.dev2_community'),
+      avatar: "./xcc.jpg",
+      contribution: t('about.contribution_dev2'),
+      bilibiliUrl: "https://space.bilibili.com/3546586967706135"
+    },
+    {
+      id: "mirror",
+      name: "bangbang93",
+      avatar: "./bb93.jpg",
+      contribution: t('about.contribution_bangbang93')
+    },{
+      id: "mirror",
+      name: "z0z0r4",
+      avatar: "./z0z0r4.jpg",
+      contribution: t('about.contribution_z0z0r4')
+    }
+  ];
+});
+
+async function openBilibili(url: string) {
+    try {
+        await open(url);
+    } catch (error) {
+        console.error("Failed to open Bilibili URL:", error)
+        window.open(url, '_blank')
+    }
+}
+
+onMounted(() => {
+    getCurrentVersion();
+});
+</script>
+
+<template>
+    <div class="tw:h-full tw:w-full tw:p-8 tw:bg-gradient-to-br tw:from-slate-50 tw:via-blue-50 tw:to-indigo-50 tw:overflow-auto">
+        <div class="tw:w-full tw:max-w-5xl tw:mx-auto tw:flex tw:flex-col tw:gap-8">
+            <div class="tw:text-center tw:animate-fade-in">
+                <h1 class="tw:text-3xl tw:font-bold tw:bg-gradient-to-r tw:from-emerald-500 tw:via-cyan-500 tw:to-blue-500 tw:bg-clip-text tw:text-transparent tw:mb-3">
+                    {{ t('about.title') }}
+                </h1>
+                <p class="tw:text-gray-500 tw:text-lg">{{ t('about.subtitle') }}</p>
+            </div>
+
+            <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8 tw:animate-fade-in-up">
+                <h2 class="tw:text-xl tw:font-bold tw:text-gray-800 tw:text-center tw:mb-6 tw:flex tw:items-center tw:justify-center tw:gap-3">
+                    <span class="tw:text-2xl"></span>
+                    <span>{{ t('about.about_software') }}</span>
+                </h2>
+                <div class="tw:flex tw:flex-col tw:items-center tw:gap-6">
+                    <div class="tw:flex tw:flex-col tw:items-center tw:gap-3">
+                        <div class="tw:flex tw:items-center tw:gap-3">
+                            <span class="tw:text-gray-600 tw:text-base">{{ t('about.current_version') }}</span>
+                            <span class="tw:text-2xl tw:font-bold tw:bg-gradient-to-r tw:from-emerald-500 tw:to-cyan-500 tw:bg-clip-text tw:text-transparent">
+                                {{ currentVersion }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="tw:flex tw:flex-col tw:items-center tw:gap-2 tw:text-gray-500 tw:text-sm">
+                        <div class="tw:flex tw:items-center tw:gap-2">
+                            <span>{{ t('about.build_time') }}</span>
+                            <span class="tw:font-medium">{{ buildTime }}</span>
+                        </div>
+                        <div class="tw:flex tw:items-center tw:gap-2">
+                            <span>{{ t('about.author') }}</span>
+                            <span class="tw:font-medium">{{ author }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tw:bg-white tw:rounded-2xl tw:shadow-lg tw:p-8 tw:animate-fade-in-up">
+                <h2 class="tw:text-xl tw:font-bold tw:text-gray-800 tw:text-center tw:mb-8 tw:flex tw:items-center tw:justify-center tw:gap-3">
+                    <span class="tw:text-2xl"></span>
+                    <span>{{ t('about.development_team') }}</span>
+                </h2>
+                <div class="tw:grid tw:grid-cols-2 md:tw:grid-cols-3 lg:tw:grid-cols-5 tw:gap-6 tw:justify-items-center">
+                    <div
+                        v-for="item in thanksList"
+                        :key="item.id"
+                        class="tw:flex tw:flex-col tw:items-center tw:w-36 tw:p-5 tw:bg-gradient-to-br tw:from-white tw:to-gray-50 tw:rounded-2xl tw:shadow-sm tw:transition-all duration-300 hover:shadow-xl hover:-translate-y-2 tw:border tw:border-gray-100 tw:group"
+                    >
+                        <div class="tw:w-20 tw:h-20 tw:bg-gradient-to-br tw:from-emerald-100 tw:to-cyan-100 tw:rounded-full tw:overflow-hidden tw:flex tw:items-center tw:justify-center tw:mb-4 tw:ring-2 tw:ring-emerald-200 tw:ring-offset-2 tw:group-hover:tw:ring-emerald-400 tw:transition-all duration-300">
+                            <img class="tw:w-full tw:h-full tw:object-cover" :src="item.avatar" :alt="item.name">
+                        </div>
+                        <h3 class="tw:text-sm tw:font-bold tw:text-gray-800 tw:group-hover:tw:text-emerald-600 tw:transition-colors">{{ item.name }}</h3>
+                        <p class="tw:text-xs tw:text-gray-500 tw:mt-2">{{ item.contribution }}</p>
+                        <a-button
+                            v-if="item.bilibiliUrl"
+                            type="link"
+                            size="small"
+                            class="tw:text-xs tw:mt-3 tw:px-3 tw:py-1 tw:rounded-full tw:bg-gradient-to-r tw:from-pink-100 tw:to-pink-200 tw:text-pink-600 tw:hover:tw:from-pink-200 tw:hover:tw:to-pink-300 tw:transition-all"
+                            @click="openBilibili(item.bilibiliUrl)"
+                        >
+                            BiliBili
+                        </a-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tw-animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.tw-animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.delay-100 {
+    animation-delay: 0.1s;
+}
+</style>

@@ -1,0 +1,30 @@
+{
+  "name": "deearthx-v4",
+  "version": "4.0.1-beta",
+  "description": "main",
+  "repository": {
+    "type": "git",
+    "url": "https://git.xcclyc.cn/xcclyc/DeEarthX-CE.git"
+  },
+  "license": "ISC",
+  "author": "DexV4 Team",
+  "type": "module",
+  "main": "./.build/build.js",
+  "scripts": {
+    "backend": "cd ./backend-net && dotnet publish src/DeEarthX.Web/DeEarthX.Web.csproj -c Release -o ./publish",
+    "rename-backend": "node -e \"require('fs').renameSync('./backend-net/publish/DeEarthX.Web.exe', './backend-net/publish/core.exe')\"",
+    "upx": ".\\.build\\upx.exe --force .\\backend-net\\publish\\core.exe",
+    "tauri": "cd ./front && pnpm run tauri build",
+    "back2target": "node b2f.js b2t",
+    "inno": "cd ./front && node scripts/build-installer.cjs",
+    "back2front": "node b2f.js b2f",
+    "build2root": "node b2f.js b2r",
+    "build": "pnpm run backend && pnpm run rename-backend && pnpm run upx && pnpm run back2front && pnpm run tauri && pnpm run back2target && pnpm run inno && pnpm run build2root"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
+  },
+  "dependencies": {
+    "fancy-installer": "^0.1.0"
+  }
+}

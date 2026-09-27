@@ -1,0 +1,30 @@
+[package]
+name = "fancy_installer"
+version = "0.1.0"
+description = "A configurable Tauri-based installer for Electron apps"
+authors = ["fancy-installer contributors"]
+edition = "2021"
+license = "MIT"
+
+[lib]
+name = "fancy_installer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+serde_json = "1"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+tar = "0.4"
+zstd = "0.13"
+tauri-plugin-dialog = "2.7.1"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.52"
+mslnk = "0.1"
+windows-sys = { version = "0.59", features = ["Win32_UI_Shell", "Win32_Foundation"] }

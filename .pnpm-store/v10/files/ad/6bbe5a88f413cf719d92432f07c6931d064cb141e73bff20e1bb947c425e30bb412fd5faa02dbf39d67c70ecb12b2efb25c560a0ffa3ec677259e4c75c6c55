@@ -1,0 +1,25 @@
+/* fancy-installer 全局 reset —— 主题相关样式在各自的 theme.css 里 */
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  background-color: transparent !important;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}

@@ -1,0 +1,377 @@
+/* 极光影音 钛金侧栏控制台主题 */
+
+.titanium-root {
+  --bg-window: #0c0d12; /* 钛金深灰 */
+  --bg-sidebar: #050608; /* 静默黑 */
+  --bg-bay: #12141c; /* 内凹舱体深色 */
+  --border-highlight: rgba(255, 255, 255, 0.05); /* 钻石切边高光 */
+  --text-main: #f1f5f9;
+  --text-muted: #4a5264;
+  --accent-purple: #8b5cf6;
+  --accent-green: #10b981;
+  --cubic: cubic-bezier(0.16, 1, 0.3, 1);
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  letter-spacing: 1.5px;
+  background: transparent;
+}
+
+/* 主控制台窗口 */
+.console-window {
+  position: relative;
+  width: 780px;
+  height: 450px;
+  background-color: var(--bg-window);
+  border: 1px solid var(--border-highlight);
+  border-radius: 16px;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ================= 左侧：极窄专业状态侧栏 ================= */
+.sidebar {
+  width: 25%;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 48px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brand-zone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--text-main);
+  border-radius: 50%;
+}
+
+.brand-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 2px;
+}
+
+/* 侧栏步骤指示器 */
+.nav-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: -40px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  transition: all 0.4s var(--cubic);
+}
+
+.nav-item.active {
+  color: var(--text-main);
+}
+
+.nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  transition: all 0.4s var(--cubic);
+}
+
+.nav-item.active .nav-dot {
+  background-color: var(--accent-purple);
+  box-shadow: 0 0 10px var(--accent-purple);
+}
+
+.nav-item.completed .nav-dot {
+  background-color: var(--accent-green);
+}
+
+.version-tag {
+  font-size: 10px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+/* ================= 右侧：核心操作控制区 ================= */
+.main-panel {
+  width: 75%;
+  padding: 24px 48px 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 标题区 */
+.main-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ti-drag-space {
+  display: flex;
+  justify-content: flex-end;
+  height: 24px;
+}
+
+.ti-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.ti-close-btn:hover { color: #ef4444; }
+
+.main-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+/* 核心展示区（高度集成的声波舱体） */
+.bay-area {
+  position: relative;
+  flex-grow: 1;
+  margin: 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 下凹式精密声波舱 */
+.acoustic-bay {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-bay);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 高精度声学物理等高柱 */
+.equalizer-grid {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 50px;
+}
+.equalizer-grid.hidden {
+  display: none;
+}
+.equalizer-bar {
+  width: 3px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 1.5px;
+  transition: all 0.4s var(--cubic);
+}
+
+/* 运行状态的物理颤动 */
+.equalizer-grid.running .equalizer-bar {
+  background: var(--text-main);
+  animation: hifi-wave 1.4s ease-in-out infinite alternate;
+}
+.equalizer-grid.running .equalizer-bar:nth-child(1) { animation-delay: 0.1s; }
+.equalizer-grid.running .equalizer-bar:nth-child(2) { animation-delay: 0.4s; }
+.equalizer-grid.running .equalizer-bar:nth-child(3) { animation-delay: 0.2s; }
+.equalizer-grid.running .equalizer-bar:nth-child(4) { animation-delay: 0.6s; }
+.equalizer-grid.running .equalizer-bar:nth-child(5) { animation-delay: 0.3s; }
+.equalizer-grid.running .equalizer-bar:nth-child(6) { animation-delay: 0.5s; }
+.equalizer-grid.running .equalizer-bar:nth-child(7) { animation-delay: 0.1s; }
+.equalizer-grid.running .equalizer-bar:nth-child(8) { animation-delay: 0.4s; }
+
+/* 成功状态 */
+.equalizer-grid.success .equalizer-bar {
+  height: 4px;
+  background: var(--accent-green);
+  animation: none;
+}
+
+/* 面板容器切换 */
+.panel-container {
+  position: absolute;
+  width: 100%;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ti-anim {
+  animation: tiFadeIn 0.4s var(--cubic) forwards;
+}
+
+@keyframes tiFadeIn {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* 步骤 1 面板 */
+.panel-container p {
+  font-size: 12px;
+  color: #6a758a;
+  margin-bottom: 20px;
+  margin-top: 0;
+  line-height: 1.6;
+}
+
+/* 拟真路径槽 */
+.path-slot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.path-slot:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.path-text {
+  font-family: monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-change {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: #4a5264;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+.path-slot:hover .btn-change {
+  color: var(--text-main);
+}
+
+/* 步骤 2 面板 */
+.progress-overlay {
+  text-align: center;
+  align-items: center;
+  z-index: 2; /* 在波纹上层 */
+  background: rgba(18, 20, 28, 0.7);
+  height: 100%;
+  justify-content: center;
+}
+.precision-pct {
+  font-size: 32px;
+  font-weight: 200;
+  color: #ffffff;
+  font-family: monospace;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+.progress-subtext {
+  font-size: 11px;
+  color: #a4b1c6;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+
+/* 步骤 3 面板 */
+.panel-success {
+  align-items: center;
+  text-align: center;
+}
+.success-indicator {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+.success-desc {
+  font-size: 12px;
+  color: #6a758a;
+}
+
+/* 页脚区域 */
+.footer-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding-top: 20px;
+  -webkit-app-region: no-drag;
+}
+.protocol-box {
+  font-size: 11px;
+  color: #4a5264;
+}
+.protocol-box a {
+  color: #64748b;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-group {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+.btn {
+  height: 36px;
+  padding: 0 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #6a758a;
+}
+.btn-secondary:hover:not(:disabled) {
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.btn-primary {
+  background: var(--text-main);
+  color: #000;
+  border: none;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #ffffff;
+  transform: translateY(-1px);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 拟真 Hi-Fi 音响电平波形动画 */
+@keyframes hifi-wave {
+  0% { height: 8px; background: rgba(255, 255, 255, 0.1); }
+  100% { height: 42px; background: var(--text-main); }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "sponsor1",
+    "name": "赞助商名称",
+    "imageUrl": "赞助商图标URL",
+    "type": "赞助商类型",
+    "url": "赞助商官网链接"
+  },
+  {
+    "id": "sponsor2",
+    "name": "示例赞助商",
+    "imageUrl": "https://example.com/logo.png",
+    "type": "金牌赞助",
+    "url": "https://example.com"
+  },
+  {
+    "id": "elfidc",
+    "name": "亿讯云",
+    "imageUrl": "./elfidc.svg",
+    "type": "金牌赞助",
+    "url": "https://www.elfidc.com"
+  }
+]

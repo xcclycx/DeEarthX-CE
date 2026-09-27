@@ -1,0 +1,419 @@
+/* Glass 主题 —— Apple VisionOS / 毛玻璃高斯模糊拟态 */
+
+@import url("https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap");
+
+.glass-root {
+  --glass-primary: #007aff; /* 默认蓝色 */
+  --glass-success: #34c759;
+
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto,
+    sans-serif;
+  /* 添加一层极淡的纯色底色，防止系统桌面过于复杂时完全看不清 */
+  background: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 12px;
+}
+
+/* 环境光球 (模糊背景) */
+.glass-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px); /* 增加模糊度 */
+  opacity: 0.8; /* 提高流光球不透明度，增加色彩氛围 */
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-orb-1 {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  left: -100px;
+  animation: floatOrb1 15s ease-in-out infinite alternate;
+}
+
+.glass-orb-2 {
+  width: 350px;
+  height: 350px;
+  bottom: -80px;
+  right: -80px;
+  animation: floatOrb2 12s ease-in-out infinite alternate-reverse;
+}
+
+.glass-orb-3 {
+  width: 300px;
+  height: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+  animation: floatOrb3 18s ease-in-out infinite alternate;
+}
+
+@keyframes floatOrb1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(60px, 40px) scale(1.1);
+  }
+}
+@keyframes floatOrb2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-60px, -40px) scale(1.1);
+  }
+}
+@keyframes floatOrb3 {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    transform: translate(-10%, -20%) scale(1.2);
+  }
+}
+/* 玻璃主面板 */
+.glass-panel {
+  width: 580px;
+  height: 420px;
+  /* 动态流光玻璃面板背景：大幅增强色彩浓度与白光反射，让流光效果显而易见 */
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    color-mix(in srgb, var(--glass-primary) 35%, transparent) 25%,
+    rgba(255, 255, 255, 0.3) 50%,
+    color-mix(in srgb, var(--glass-success) 35%, transparent) 75%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 200%;
+  animation: glassPanelPan 6s ease-in-out infinite alternate;
+
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 1),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+@keyframes glassPanelPan {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+header {
+  height: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  -webkit-app-region: drag;
+}
+
+.glass-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* 增强文字可读性 */
+}
+
+.glass-brand img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.glass-btn-close {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-app-region: no-drag;
+}
+.glass-btn-close:hover {
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+main {
+  flex: 1;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.glass-step {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.glass-center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.glass-anim-in {
+  animation: glassFadeScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes glassFadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.glass-hero h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5); /* 增强文字可读性 */
+}
+
+.glass-hero p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85); /* 提高对比度 */
+  line-height: 1.5;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.glass-control-group {
+  margin-top: auto;
+}
+
+.glass-control-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 12px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 拟态路径框 */
+.glass-input-morph {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4); /* 更深的底色 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  padding: 6px 6px 6px 16px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition:
+    background 0.3s,
+    border-color 0.3s;
+}
+.glass-input-morph:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.glass-path-text {
+  flex: 1;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glass-btn-sm {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 进度环 */
+.glass-circular-progress {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin-bottom: 24px;
+}
+
+.glass-circular-progress svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  filter: drop-shadow(0 0 16px var(--glass-primary));
+}
+
+.glass-circle-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 6;
+}
+
+.glass-circle-fill {
+  fill: none;
+  stroke: var(--glass-primary);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 339.29;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.glass-percent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 600;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.glass-status {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 1px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 成功面板 */
+.glass-success-badge {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.1)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  color: var(--glass-success);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 2px 10px rgba(255, 255, 255, 0.3);
+}
+
+.glass-step h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.glass-step p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.glass-chips {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.glass-chip {
+  background: rgba(0, 0, 0, 0.3); /* 深底色突出标签 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--chip-color, #fff);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer */
+footer {
+  padding: 20px 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  justify-content:space-between;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+footer.success {
+  justify-content: center;
+}
+
+.glass-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+.glass-hint a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.glass-btn-primary {
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-btn-primary:hover {
+  background: #ffffff;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(255, 255, 255, 0.4);
+}
+
+.glass-btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.glass-btn-success {
+  width: 50%;
+}

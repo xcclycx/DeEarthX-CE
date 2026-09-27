@@ -1,0 +1,49 @@
+// macOS 实现：把 .app bundle 拷到 /Applications/，通过 `open -a` 启动。
+// 注：macOS 应用通常分发为 .dmg，但 Electron 项目也常输出为目录形态的 .app；
+// 这里假设 payload 解开就是 <AppName>.app/ 目录结构。
+
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use tauri::AppHandle;
+
+use super::{InstallContext, LogFn};
+
+pub fn default_install_root(_app: &AppHandle, app_name: &str) -> Result<PathBuf, String> {
+    // /Applications/<AppName>.app
+    Ok(PathBuf::from("/Applications").join(format!("{app_name}.app")))
+}
+
+pub fn install_finalize(ctx: &InstallContext, log: LogFn) {
+    // 注册到 LaunchServices，让 Launchpad / Spotlight 立即感知
+    let install_dir = ctx.install_dir;
+    let r = Command::new("/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister")
+        .arg("-f")
+        .arg(install_dir)
+        .status();
+    match r {
+        Ok(s) if s.success() => log("已注册到 LaunchServices".to_string()),
+        Ok(s) => log(format!("lsregister 退出码 {s}")),
+        Err(e) => log(format!("lsregister 执行失败（可忽略）: {e}")),
+    }
+}
+
+pub fn launch_installed_app(
+    _app: &AppHandle,
+    app_name: &str,
+    _exe_name: &str,
+) -> Result<(), String> {
+    let app_path = PathBuf::from("/Applications").join(format!("{app_name}.app"));
+    if !app_path.exists() {
+        return Err(format!("找不到已安装的应用：{}", app_path.display()));
+    }
+    Command::new("open")
+        .arg(&app_path)
+        .spawn()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[allow(dead_code)]
+fn ensure_executable_bit(_p: &Path) {
+    // 占位：macOS 在 codesign 后会校验权限位，必要时可以 chmod +x 内部二进制
+}

@@ -1,0 +1,26 @@
+// 最简 Electron 主进程 —— 仅用于演示 fancy-installer 的打包流程
+const { app, BrowserWindow } = require("electron");
+const path = require("path");
+
+function createWindow() {
+  const win = new BrowserWindow({
+    width: 640,
+    height: 420,
+    title: "Hello Electron",
+    autoHideMenuBar: true,
+    webPreferences: {
+      contextIsolation: true,
+    },
+  });
+  win.loadFile(path.join(__dirname, "index.html"));
+}
+
+app.whenReady().then(createWindow);
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+});

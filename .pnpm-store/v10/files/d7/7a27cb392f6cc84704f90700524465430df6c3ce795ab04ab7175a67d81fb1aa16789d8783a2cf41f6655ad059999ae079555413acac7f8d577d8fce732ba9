@@ -1,0 +1,333 @@
+/* Eco 自然/有机/流体风格主题 */
+
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
+
+.eco-root {
+  --eco-bg: #f9fbf9; /* Soft greenish white */
+  --eco-surface: #ffffff;
+  --eco-text: #2d3b2d;
+  --eco-muted: #738573;
+  --eco-primary: #4CAF50; /* Fallback */
+  
+  font-family: 'Quicksand', sans-serif;
+  background: transparent;
+  color: var(--eco-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.eco-window {
+  width: 540px;
+  height: 500px;
+  background-color: var(--eco-bg);
+  /* 有机的、不对称的外边框圆角 */
+  border-radius: 40px 60px 40px 60px / 60px 40px 60px 40px;
+  box-shadow: 0 20px 50px rgba(45, 59, 45, 0.1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 漂浮的有机色块背景 */
+.eco-blob {
+  position: absolute;
+  background: var(--eco-primary);
+  opacity: 0.05;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation: ecoMorph 8s ease-in-out infinite alternate;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.eco-blob-1 {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  right: -50px;
+}
+
+.eco-blob-2 {
+  width: 250px;
+  height: 250px;
+  bottom: -80px;
+  left: -80px;
+  animation-delay: -4s;
+}
+
+@keyframes ecoMorph {
+  0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1); }
+  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: scale(1.05) rotate(5deg); }
+  100% { border-radius: 40% 60% 50% 40% / 40% 50% 60% 30%; transform: scale(0.95) rotate(-5deg); }
+}
+
+header {
+  position: relative;
+  z-index: 1;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  -webkit-app-region: drag;
+}
+
+.eco-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--eco-primary);
+}
+
+.eco-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.eco-close {
+  background: transparent;
+  border: none;
+  color: var(--eco-muted);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: color 0.3s;
+}
+.eco-close:hover {
+  color: #ff5252;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 10px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.eco-step {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.eco-center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.eco-anim-soft {
+  animation: ecoFadeUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes ecoFadeUp {
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.eco-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.eco-center-content {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.eco-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--eco-text);
+}
+
+.eco-desc {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--eco-muted);
+  margin: 0 0 32px;
+  line-height: 1.5;
+}
+
+/* 路径选择块 - 柔软卡片 */
+.eco-path-wrapper {
+  background: var(--eco-surface);
+  border-radius: 20px 30px 20px 30px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 30px rgba(45, 59, 45, 0.05);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.eco-path-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(45, 59, 45, 0.08);
+}
+
+.eco-path-icon {
+  width: 40px;
+  height: 40px;
+  background: color-mix(in srgb, var(--eco-primary) 15%, transparent);
+  color: var(--eco-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eco-path-text {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--eco-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eco-path-hint {
+  font-size: 12px;
+  color: var(--eco-muted);
+  font-weight: 500;
+}
+
+/* 有机生长进度 */
+.eco-growth-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 24px;
+}
+
+.eco-growth-mask {
+  width: 100%;
+  height: 100%;
+  background: var(--eco-surface);
+  border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%;
+  box-shadow: inset 0 10px 20px rgba(0,0,0,0.05);
+  overflow: hidden;
+  position: relative;
+  animation: ecoMorph 5s linear infinite alternate;
+}
+
+.eco-growth-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, var(--eco-primary), color-mix(in srgb, var(--eco-primary) 50%, white));
+  transition: height 0.4s ease-out;
+  /* 液体顶部波动波浪 */
+  border-radius: 40% 60% 0 0 / 20% 20% 0 0;
+}
+
+.eco-growth-percent {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--eco-text);
+  text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+}
+
+.eco-status-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--eco-muted);
+}
+
+/* 成功面板 */
+.eco-leaf-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--eco-primary);
+  border-radius: 50% 50% 0 50%; /* 叶子形状 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--eco-primary) 30%, transparent);
+  transform: rotate(45deg);
+}
+
+.eco-leaf-icon svg {
+  transform: rotate(-45deg); /* 把图标转正 */
+}
+
+.eco-tags {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.eco-tag {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* 底部操作 */
+.eco-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0 10px;
+  -webkit-app-region: no-drag;
+}
+.eco-actions-center {
+  justify-content: center;
+}
+
+.eco-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--eco-muted);
+  text-decoration: none;
+}
+.eco-link:hover {
+  color: var(--eco-primary);
+}
+
+.eco-btn {
+  background: var(--eco-primary);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 30px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--eco-primary) 25%, transparent);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.eco-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px color-mix(in srgb, var(--eco-primary) 35%, transparent);
+}
+
+.eco-btn:active {
+  transform: translateY(0);
+}
+
+.eco-btn-wide {
+  min-width: 200px;
+}

@@ -1,0 +1,134 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./geist.css";
+
+export default function GeistTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts, primaryColor } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error -- Custom CSS properties
+    "--g-accent": primaryColor,
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center geist-root" style={cssVars}>
+      <div className="geist-card glass-draggable">
+        {/* Subtle top glow */}
+        <div className="geist-glow" />
+
+        <header data-tauri-drag-region>
+          <div className="geist-brand" data-tauri-drag-region>
+            <div className="geist-logo-wrap">
+              <img src={logo} alt="Logo" />
+            </div>
+            <span>{config.appDisplayName}</span>
+            <span className="geist-version">v{config.appVersion}</span>
+          </div>
+          <button className="geist-close" onClick={state.close} aria-label="Close">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="geist-step geist-fade-up">
+              <h1>{texts.welcomeTitle}</h1>
+              <p className="geist-sub">{texts.welcomeSubtitle}</p>
+              
+              <div className="geist-spacer" />
+
+              <div className="geist-form-group">
+                <label>Install Location</label>
+                <div className="geist-input-box" onClick={state.selectPath}>
+                  <span className="geist-path" title={installPath}>{installPath}</span>
+                  <button className="geist-btn-secondary">Browse</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="geist-step geist-center geist-fade-up">
+              <div className="geist-spinner-wrap">
+                <svg className="geist-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div className="geist-progress-track">
+                <div className="geist-progress-fill" style={{ width: `${progress}%` }} />
+              </div>
+              <div className="geist-progress-meta">
+                <span className="geist-status">{getStatusText()}</span>
+                <span className="geist-percent">{progress}%</span>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="geist-step geist-fade-up">
+              <div className="geist-success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <path d="M22 4L12 14.01l-3-3" />
+                </svg>
+              </div>
+              <h1>{texts.successTitle}</h1>
+              <p className="geist-sub">{texts.successSubtitle}</p>
+
+              <div className="geist-spacer" />
+
+              {texts.features.length > 0 && (
+                <div className="geist-features">
+                  {texts.features.map(f => (
+                    <div key={f.label} className="geist-feature-chip">
+                      <span className="geist-dot" style={{ backgroundColor: f.color }} />
+                      {f.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+
+        <footer>
+          {step === 1 && (
+            <>
+              <a href="#" className="geist-link">{texts.licenseAgreement}</a>
+              <button className="geist-btn-primary" onClick={state.startInstall}>
+                {texts.installButton}
+              </button>
+            </>
+          )}
+          {step === 2 && (
+            <>
+              <span className="geist-muted-text">Please wait...</span>
+            </>
+          )}
+          {step === 3 && (
+            <>
+              <span className="geist-muted-text">Ready to use</span>
+              <button className="geist-btn-primary" onClick={state.launch}>
+                {texts.launchButton}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}

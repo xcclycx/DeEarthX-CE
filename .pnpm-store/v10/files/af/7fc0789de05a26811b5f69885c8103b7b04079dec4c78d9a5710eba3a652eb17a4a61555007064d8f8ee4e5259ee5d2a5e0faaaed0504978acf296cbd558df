@@ -1,0 +1,351 @@
+/* Hyperspace 宇宙跃迁星空风格主题 */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+.hs-root {
+  --hs-bg: #000000;
+  --hs-panel: rgba(10, 15, 30, 0.7);
+  --hs-primary: #a78bfa; /* Light purple */
+  --hs-cyan: #22d3ee;
+  --hs-text: #ffffff;
+  --hs-muted: #9ca3af;
+  
+  font-family: 'Space Mono', monospace;
+  background: var(--hs-bg);
+  color: var(--hs-text);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 星空背景 (利用 box-shadow 绘制) */
+.hs-space-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  perspective: 1000px;
+}
+
+.hs-stars {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 
+    100px 200px #fff, 300px 100px #fff, 500px 400px #fff, 700px 50px #fff, 
+    900px 300px #fff, 150px 500px #fff, 400px 600px #fff, 800px 700px #fff,
+    250px 50px #a78bfa, 650px 250px #22d3ee, 850px 550px #a78bfa;
+  animation: hsWarp 10s linear infinite;
+  transform-style: preserve-3d;
+}
+
+.hs-stars-2 {
+  width: 3px; height: 3px;
+  box-shadow: 
+    50px 150px #fff, 250px 350px #fff, 450px 150px #fff, 850px 450px #fff, 
+    550px 650px #fff, 750px 200px #fff, 350px 50px #fff, 100px 650px #fff,
+    150px 250px #22d3ee, 750px 550px #a78bfa;
+  animation-duration: 6s;
+}
+
+.hs-stars-3 {
+  width: 4px; height: 4px;
+  box-shadow: 
+    200px 400px #fff, 600px 100px #fff, 800px 500px #fff, 100px 100px #fff, 
+    300px 600px #fff, 500px 300px #fff, 900px 150px #fff, 700px 650px #fff,
+    450px 250px #a78bfa, 950px 550px #22d3ee;
+  animation-duration: 3s;
+}
+
+@keyframes hsWarp {
+  0% { transform: translateZ(-1000px) scale(0.1); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateZ(500px) scale(2); opacity: 0; }
+}
+
+/* 主面板 */
+.hs-window {
+  width: 720px;
+  height: 500px;
+  background: var(--hs-panel);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 40px rgba(167, 139, 250, 0.1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+header {
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.1), transparent);
+  -webkit-app-region: drag;
+}
+
+.hs-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.hs-brand img {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+
+.hs-close {
+  background: transparent;
+  border: none;
+  color: var(--hs-muted);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: color 0.2s;
+}
+.hs-close:hover {
+  color: #ff4757;
+}
+
+main {
+  flex: 1;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hs-step {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.hs-center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.hs-center-content {
+  text-align: center;
+}
+
+.hs-anim-warp {
+  animation: hsWarpIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes hsWarpIn {
+  0% { opacity: 0; transform: translateZ(-200px) scale(0.8); filter: blur(10px); }
+  100% { opacity: 1; transform: translateZ(0) scale(1); filter: blur(0); }
+}
+
+.hs-hero h1 {
+  font-size: 36px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  letter-spacing: -1px;
+}
+
+.hs-hero p {
+  font-size: 15px;
+  color: var(--hs-muted);
+  margin: 0 0 40px;
+}
+
+.hs-form {
+  margin-top: auto;
+}
+
+.hs-form label {
+  display: block;
+  font-size: 13px;
+  color: var(--hs-cyan);
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hs-input-box {
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 8px 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background 0.3s, border-color 0.3s;
+}
+.hs-input-box:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--hs-primary);
+}
+
+.hs-path {
+  flex: 1;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hs-btn-sm {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 跃迁隧道进度 */
+.hs-warp-tunnel {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  perspective: 500px;
+}
+
+.hs-tunnel-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--hs-primary);
+  box-shadow: 0 0 20px var(--hs-primary), inset 0 0 20px var(--hs-cyan);
+  animation: tunnelSpin 3s linear infinite;
+}
+
+.hs-tunnel-ring-1 { width: 180px; height: 180px; transform: translateZ(-100px); animation-duration: 4s; }
+.hs-tunnel-ring-2 { width: 120px; height: 120px; transform: translateZ(-50px); animation-direction: reverse; }
+.hs-tunnel-ring-3 { width: 60px; height: 60px; transform: translateZ(0); animation-duration: 2s; }
+
+@keyframes tunnelSpin {
+  100% { transform: rotate(360deg); }
+}
+
+.hs-percent {
+  font-size: 48px;
+  font-weight: 700;
+  text-shadow: 0 0 20px var(--hs-cyan);
+  z-index: 2;
+}
+
+.hs-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.hs-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--hs-primary), var(--hs-cyan));
+  box-shadow: 0 0 10px var(--hs-cyan);
+  transition: width 0.2s ease-out;
+}
+
+.hs-status {
+  font-size: 14px;
+  color: var(--hs-muted);
+}
+
+/* 成功面板 */
+.hs-success-icon {
+  color: var(--hs-cyan);
+  filter: drop-shadow(0 0 20px var(--hs-cyan));
+  margin-bottom: 24px;
+}
+
+.hs-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 40px;
+  justify-content: center;
+}
+
+.hs-feature-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  animation: hsFadeUp 0.4s ease-out backwards;
+}
+
+@keyframes hsFadeUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.hs-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* Footer */
+footer {
+  padding: 24px 48px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.hs-link {
+  font-size: 13px;
+  color: var(--hs-muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.hs-link:hover {
+  color: #fff;
+}
+
+.hs-btn {
+  background: var(--hs-primary);
+  color: #000;
+  border: none;
+  padding: 14px 40px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+  transition: all 0.2s;
+}
+
+.hs-btn:hover {
+  background: #fff;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+.hs-btn-full {
+  width: 100%;
+}

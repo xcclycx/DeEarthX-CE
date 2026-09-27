@@ -1,0 +1,31 @@
+:root {
+  /* Brand */
+  --bg-brand: #4B3FE3;
+  --bg-brand-hover: #6A6FFF;
+  --bg-brand-active: #3F31C6;
+
+  /* Background */
+  --bg-base-default: #FFFFFF;
+  --bg-base-secondary: #F5F5F5;
+
+  /* Text */
+  --text-default: #171717;
+  --text-secondary: #404040;
+  --text-tertiary: #737373;
+
+  /* Border */
+  --border-neutral-l1: rgba(115, 115, 115, 0.12);
+  --border-neutral-l2: rgba(115, 115, 115, 0.18);
+
+  /* Status */
+  --status-success-default: #15A877;
+  --status-warning-default: #E27900;
+  --status-error-default: #E8463A;
+
+  /* Font */
+  --font-family-default: "SF Pro Text", "PingFang SC", system-ui, sans-serif;
+
+  /* Radius */
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}

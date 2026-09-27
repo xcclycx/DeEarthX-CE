@@ -1,0 +1,35 @@
+{
+  "name": "create-fancy-installer",
+  "version": "0.1.0",
+  "description": "Scaffold a fancy-installer project for your Electron app in one command.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lzyszds/fancy-installer.git",
+    "directory": "packages/create-fancy-installer"
+  },
+  "homepage": "https://github.com/lzyszds/fancy-installer#readme",
+  "bugs": {
+    "url": "https://github.com/lzyszds/fancy-installer/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "bin": {
+    "create-fancy-installer": "bin.mjs"
+  },
+  "files": [
+    "bin.mjs",
+    "README.md"
+  ],
+  "keywords": [
+    "installer",
+    "electron",
+    "tauri",
+    "scaffold"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

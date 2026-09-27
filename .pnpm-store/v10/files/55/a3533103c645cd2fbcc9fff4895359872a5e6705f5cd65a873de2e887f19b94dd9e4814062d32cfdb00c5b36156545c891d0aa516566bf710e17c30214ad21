@@ -1,0 +1,32 @@
+# create-fancy-installer
+
+一行命令脚手架 [fancy-installer](https://github.com/lzyszds/fancy-installer) 项目。
+
+```bash
+npx create-fancy-installer my-installer
+# 或带参数
+npx create-fancy-installer my-installer --theme aurora --no-install
+```
+
+执行后会：
+
+1. 克隆 fancy-installer 模板到 `my-installer/`
+2. 询问 appName / exeName / publisher / 主题
+3. 写入 `installer.config.json`
+4. 跑 `npm install`
+5. 初始化新的 git 仓库
+
+## 选项
+
+```
+--theme <name>     初始主题 (aurora | minimal | geist | bento | coral | titanium | glass | neumorphic | synthwave | eco | plasma | hologram | liquid | gaming | hyperspace)
+--app-name <name>  应用名（appName / appDisplayName）
+--exe-name <name>  可执行文件名
+--publisher <name> 发行商
+--repo <url>       模板 git 仓库（默认 https://github.com/lzyszds/fancy-installer.git）
+--no-install       跳过 npm install
+```
+
+## License
+
+MIT

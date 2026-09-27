@@ -1,0 +1,135 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./bento.css";
+
+export default function BentoTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts, primaryColor, successColor } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error
+    "--bento-primary": primaryColor,
+    "--bento-success": successColor,
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center bento-root" style={cssVars}>
+      <div className="bento-card glass-draggable">
+        
+        {/* Header (Top Bento Box) */}
+        <div className="bento-box bento-header" data-tauri-drag-region>
+          <div className="bento-brand" data-tauri-drag-region>
+            <div className="bento-icon-box">
+              <img src={logo} alt="icon" />
+            </div>
+            <span>{config.appDisplayName}</span>
+          </div>
+          <button className="bento-close-btn" onClick={state.close}>
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Dynamic Bento Grid based on step */}
+        <div className="bento-grid">
+          {step === 1 && (
+            <>
+              <div className="bento-box col-span-2 bento-hero bento-anim-up">
+                <h1>{texts.welcomeTitle}</h1>
+                <p>{texts.welcomeSubtitle}</p>
+                <div className="bento-tags">
+                  <span className="bento-tag">v{config.appVersion}</span>
+                  <span className="bento-tag">{config.appPublisher}</span>
+                </div>
+              </div>
+
+              <div className="bento-box col-span-2 bento-path-box bento-anim-up" style={{ animationDelay: '0.05s' }}>
+                <div className="bento-path-label">Destination</div>
+                <div className="bento-path-selector" onClick={state.selectPath}>
+                  <div className="bento-path-text" title={installPath}>{installPath}</div>
+                  <button className="bento-btn-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="bento-box col-span-2 bento-action-box bento-anim-up" style={{ animationDelay: '0.1s' }}>
+                <a href="#" className="bento-link">{texts.licenseAgreement}</a>
+                <button className="bento-btn-primary" onClick={state.startInstall}>
+                  {texts.installButton}
+                </button>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div className="bento-box col-span-2 bento-progress-hero bento-anim-up">
+                <div className="bento-progress-circle">
+                  <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="44" className="bento-circle-bg" />
+                    <circle cx="50" cy="50" r="44" className="bento-circle-fill" style={{ strokeDashoffset: 276.46 - (276.46 * progress) / 100 }} />
+                  </svg>
+                  <div className="bento-percent">{progress}%</div>
+                </div>
+              </div>
+              
+              <div className="bento-box col-span-2 bento-status-box bento-anim-up" style={{ animationDelay: '0.05s' }}>
+                <h3>Installing</h3>
+                <p>{getStatusText()}</p>
+                <div className="bento-linear-progress">
+                  <div className="bento-linear-fill" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <div className="bento-box bento-success-hero bento-anim-up">
+                <div className="bento-success-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </div>
+                <h2>{texts.successTitle}</h2>
+                <p>{texts.successSubtitle}</p>
+              </div>
+
+              <div className="bento-box bento-features-box bento-anim-up" style={{ animationDelay: '0.05s' }}>
+                <h3>Highlights</h3>
+                <div className="bento-feature-list">
+                  {texts.features.map(f => (
+                    <div key={f.label} className="bento-feature-item" style={{ color: f.color, backgroundColor: `${f.color}15` }}>
+                      {f.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bento-box col-span-2 bento-action-box bento-anim-up" style={{ animationDelay: '0.1s' }}>
+                <button className="bento-btn-primary bento-btn-success" onClick={state.launch}>
+                  {texts.launchButton}
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

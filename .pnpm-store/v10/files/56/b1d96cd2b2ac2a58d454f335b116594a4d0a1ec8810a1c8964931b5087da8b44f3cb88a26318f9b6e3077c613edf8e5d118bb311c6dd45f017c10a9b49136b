@@ -1,0 +1,118 @@
+import type { ThemeProps } from "../../types";
+import "./coral.css";
+
+export default function CoralTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts, primaryColor } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error
+    "--app-coral": primaryColor,
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center coral-root" style={cssVars}>
+      <div className="app-installer glass-draggable">
+        {/* 1. 官方深色顶栏 */}
+        <div className="title-bar" data-tauri-drag-region>
+          <div className="brand-group" data-tauri-drag-region>
+            <div className="app-mini-logo">{config.appDisplayName.charAt(0).toUpperCase()}</div>
+            <div className="brand-name">{config.appDisplayName}</div>
+          </div>
+          <div className="window-controls">
+            <button className="win-dot" onClick={state.close} aria-label="close"></button>
+            <div className="win-dot"></div>
+            <div className="win-dot"></div>
+          </div>
+        </div>
+
+        {/* 2. 主体展示区（暖米色底色） */}
+        <div className="content-body">
+          {step === 1 && (
+            <div className="step-panel active coral-anim">
+              <div className="badge-row">
+                <div className="badge-pill pink">当前状态: 准备部署</div>
+                <div className="badge-pill blue">{config.appPublisher} 官方正版授权</div>
+              </div>
+              <h1>{texts.welcomeTitle}</h1>
+              <p>{texts.welcomeSubtitle}</p>
+              
+              <div className="search-style-box" onClick={state.selectPath}>
+                <input type="text" readOnly value={installPath} title={installPath} />
+                <button className="btn-change-path">更换位置</button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="step-panel panel-progress active coral-anim">
+              <div className="cli-status-bar">
+                <span>&gt;_</span>
+                <span>{getStatusText()}</span>
+              </div>
+              <div className="progress-track">
+                <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+              </div>
+              <div className="progress-meta">
+                <span>{progress}% 已完成</span>
+                <span>正在注入底层驱动</span>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="step-panel panel-success active coral-anim">
+              <div className="badge-row">
+                <div className="badge-pill pink">部署完毕</div>
+              </div>
+              <h2>{texts.successTitle}</h2>
+              <p>{texts.successSubtitle}</p>
+            </div>
+          )}
+
+          {/* 3. 页脚控制栏 */}
+          <div className="footer-bar">
+            {step === 1 && (
+              <>
+                <div className="protocol-box">
+                  我已同意并接受 <a href="#">{texts.licenseAgreement}</a>
+                </div>
+                <div className="action-group">
+                  <button className="btn btn-secondary" onClick={state.close}>取消</button>
+                  <button className="btn btn-primary" onClick={state.startInstall}>{texts.installButton}</button>
+                </div>
+              </>
+            )}
+            
+            {step === 2 && (
+              <>
+                <div className="protocol-box">部署进行中，请勿关闭系统...</div>
+                <div className="action-group">
+                  <button className="btn btn-secondary" disabled>取消</button>
+                  <button className="btn btn-primary" disabled style={{ opacity: 0.7 }}>部署中...</button>
+                </div>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <div className="protocol-box"></div>
+                <div className="action-group">
+                  <button className="btn btn-primary" onClick={state.launch}>{texts.launchButton}</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>Galaxy</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="src\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="src\Galaxy.Core\Galaxy.Core.csproj" />
+    <ProjectReference Include="src\Galaxy.Data\Galaxy.Data.csproj" />
+    <ProjectReference Include="src\Galaxy.Auth\Galaxy.Auth.csproj" />
+    <ProjectReference Include="src\Galaxy.Mods\Galaxy.Mods.csproj" />
+    <ProjectReference Include="src\Galaxy.OAuth\Galaxy.OAuth.csproj" />
+  </ItemGroup>
+
+</Project>

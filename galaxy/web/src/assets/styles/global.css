@@ -1,0 +1,93 @@
+@import './variables.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: var(--font-family-default);
+  color: var(--text-default);
+  background-color: var(--bg-base-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--bg-brand);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--bg-brand-hover);
+}
+
+/* Ant Design 覆盖 */
+.ant-btn-primary {
+  background: var(--bg-brand) !important;
+  border-color: var(--bg-brand) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.ant-btn-primary:hover {
+  background: var(--bg-brand-hover) !important;
+  border-color: var(--bg-brand-hover) !important;
+}
+
+.ant-btn-primary:active {
+  background: var(--bg-brand-active) !important;
+  border-color: var(--bg-brand-active) !important;
+}
+
+.ant-input:focus,
+.ant-input-focused {
+  border-color: var(--bg-brand) !important;
+  box-shadow: 0 0 0 2px rgba(75, 63, 227, 0.15) !important;
+}
+
+.ant-card {
+  border-radius: var(--radius-lg) !important;
+  border-color: var(--border-neutral-l1) !important;
+}
+
+.ant-table {
+  border-radius: var(--radius-lg) !important;
+}
+
+.ant-tag {
+  border-radius: var(--radius-md) !important;
+}
+
+.ant-layout-sider {
+  border-right: 1px solid var(--border-neutral-l1) !important;
+}
+
+.ant-menu-item-selected {
+  color: var(--bg-brand) !important;
+}
+
+.ant-menu-item-selected::after {
+  border-bottom-color: var(--bg-brand) !important;
+}
+
+/* 工具类 */
+.brand-gradient-text {
+  background: linear-gradient(135deg, var(--bg-brand), var(--bg-brand-hover));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}

@@ -1,0 +1,239 @@
+# fancy-installer
+
+> A configurable, theme-driven installer for Electron apps — built on Tauri.
+> 给 Electron 应用做一个**自定义 UI 的安装器**，只用改一份 JSON 配置。
+
+---
+
+## 为什么需要它？
+
+- `electron-builder` 自带的 NSIS 安装器既丑又老
+- `Velopack` / `Squirrel` 风格固定，没法做品牌定制
+- 自己用 Tauri / NSIS / Inno 撸一个又要啃半天
+
+fancy-installer 解决的是：**配置 + 主题切换**就能拿到一个开箱即用、视觉现代的安装器。
+最终产物是一个 **~10MB + payload 的单文件 exe**，把 Electron 应用打包在里面，运行后释放到用户机器、写注册表、建快捷方式、最后启动。
+
+## 特性
+
+- 🎨 **四套内置主题**：`aurora` / `minimal` / `cyberpunk` / `retro-mac`
+- 🧩 **配置驱动**：所有文案、主色、特性胶囊都在 `installer.config.json` 里改
+- 🌍 **跨平台**：Windows ✅ · macOS ⚠️ Experimental · Linux ⚠️ Experimental
+- 🔌 **Electron 自动集成**：从 `package.json` 自动读取 productName / version / publisher / appId，复用项目图标
+- 📦 **极致压缩**：tar + zstd-19 比 zip 省 20-30%
+- 🪟 **真正的系统集成**：Windows 注册表卸载项 + 开始菜单/桌面快捷方式；macOS LaunchServices 注册；Linux .desktop 项
+- 🎭 **演示模式**：未打包 payload 也能 `npm run tauri:dev` 看 UI 效果
+
+## 一行命令开始
+
+```bash
+npx create-fancy-installer my-installer
+```
+
+CLI 会问你 appName / 主题 / publisher，自动克隆模板 + 安装依赖 + git init。
+
+或者手动 clone：
+
+```bash
+git clone https://github.com/<your>/fancy-installer
+cd fancy-installer
+npm install
+npm run tauri:dev     # 演示模式，直接看 UI
+```
+
+### 端到端示例（含真实 Electron 应用）
+
+```bash
+cd examples/hello-electron && npm install && npm run build:unpack
+cd ../.. && npm run pack -- --electron examples/hello-electron
+```
+
+成品落在 `examples/hello-electron/release/HelloElectron-Setup-1.0.0.exe`。
+
+## 四套主题
+
+| 主题 | 风格 | 适合 |
+|------|------|------|
+| **aurora**     | 深色玻璃拟态、极光漂移、反应堆动效、粒子爆发 | C 端视觉向应用 |
+| **minimal**    | 浅色卡片、简洁进度条、极简徽章         | 企业级 / 开发者工具 |
+| **cyberpunk**  | 霓虹紫粉、扫描线、ASCII 像素、雷达扫描 | 游戏、工具向、复古赛博 |
+| **retro-mac**  | Mac OS Platinum、横条标题栏、凸起按钮 | 复古、独立游戏、致敬 |
+
+切主题就改一行：
+
+```json
+{ "theme": "cyberpunk" }
+```
+
+## 配置
+
+`installer.config.json` 一份文件管所有：
+
+```json
+{
+  "appName": "MyApp",
+  "appDisplayName": "My App",
+  "appPublisher": "Your Company",
+  "appVersion": "1.0.0",
+  "exeName": "MyApp.exe",
+  "appDescription": "...",
+  "appIdentifier": "com.yourcompany.myapp",
+
+  "theme": "aurora",
+  "primaryColor": "#f43f5e",
+  "accentColor": "#06b6d4",
+  "successColor": "#10b981",
+
+  "texts": {
+    "welcomeTitle": "欢迎安装",
+    "welcomeSubtitle": "...",
+    "installButton": "开始安装",
+    "licenseAgreement": "《许可协议及隐私条款》",
+    "progressFrames": [
+      { "limit": 25, "text": "..." },
+      { "limit": 100, "text": "..." }
+    ],
+    "successTitle": "安装成功",
+    "successSubtitle": "...",
+    "features": [
+      { "label": "极速启动", "color": "#10b981" }
+    ],
+    "launchButton": "立即启动"
+  }
+}
+```
+
+## 打包
+
+```bash
+npm run pack                              # 默认 electron 项目 = ..
+npm run pack -- --electron ../my-app      # 指定 electron 项目路径
+npm run pack -- --skip-build              # 只刷新 payload + 配置
+```
+
+流程：
+
+1. 从 Electron 项目 `package.json` 推断 identity
+2. 用 Electron 项目的图标重新生成 Tauri 全套图标
+3. 跨平台探测 unpacked 目录（`release/win-unpacked/` · `release/mac*/X.app/` · `release/linux-unpacked/`）
+4. 用 zstd-19 把 unpacked 压成 `payload.tar.zst`
+5. 调 `tauri build` 编译最终 exe
+6. 把成品拷到 Electron 项目的 `release/` 目录
+
+## 跨平台支持
+
+| 平台 | 状态 | 安装位置 | 集成方式 |
+|------|------|---------|--------|
+| **Windows 10/11 x64** | ✅ Stable | `%LOCALAPPDATA%\<AppName>\` | 注册表 Uninstall + 开始菜单 .lnk + 桌面 .lnk |
+| **macOS** (Intel / Apple Silicon) | ⚠️ Experimental | `/Applications/<AppName>.app/` | `lsregister` 注册 LaunchServices |
+| **Linux** (Ubuntu / Fedora) | ⚠️ Experimental | `~/.local/share/<AppName>/` | `.desktop` entry 到 `~/.local/share/applications/` |
+
+平台特异代码隔离在 `src-tauri/src/platform/{windows,macos,linux}.rs`，每个文件实现三个函数：`default_install_root` / `install_finalize` / `launch_installed_app`。要扩展或修复某平台只需改对应文件。
+
+## 自定义主题
+
+每个主题就是一个 React 组件：
+
+```tsx
+// src/themes/my-theme/index.tsx
+import type { ThemeProps } from "../../types";
+
+export default function MyTheme({ config, state }: ThemeProps) {
+  return (
+    <div>
+      <h1>{config.texts.welcomeTitle}</h1>
+      <button onClick={state.startInstall}>{config.texts.installButton}</button>
+    </div>
+  );
+}
+```
+
+在 `src/themes/index.ts` 注册即可。
+
+`ThemeProps` 提供：
+
+- `config: NormalizedConfig` — 全套配置（appName / 颜色 / 文案 / 特性胶囊）
+- `state: InstallerState` — `step` / `progress` / `installPath` / `selectPath()` / `startInstall()` / `launch()` / `close()`
+
+所有安装逻辑（路径选择、进度订阅、Tauri 通信）由 `useInstaller` hook 统一管理，主题**只负责 UI**。
+
+## 工作原理
+
+```
+你的 Electron 项目                fancy-installer
+─────────────────                ───────────────
+release/win-unpacked/  ─┐
+（或 mac*/X.app）        │  npm run pack
+（或 linux-unpacked）   │  ───────────────────►
+package.json (产品名等)  │
+build/icon.png         ─┘
+                                 ┌─ installer.config.json (嵌入)
+                                 ├─ payload.tar.zst        (嵌入)
+                                 └─ icons/                  (重新生成)
+                                              │
+                                              ▼
+                                       tauri build
+                                              │
+                                              ▼
+                              MyApp-Setup-1.0.0.exe / .app
+```
+
+最终二进制内嵌：
+
+- `installer.config.json`（`include_str!`）
+- `payload.tar.zst`（`include_bytes!`）
+- Tauri runtime + WebView2 / WKWebView 包装
+
+运行时：
+
+1. 加载嵌入的 config → 渲染对应主题
+2. "开始安装" → 解压 payload 到目标目录
+3. 平台特异收尾（注册表 / LaunchServices / .desktop）
+4. "立即启动" → 拉起已安装的程序
+
+## 目录结构
+
+```
+fancy-installer/
+├── installer.config.json     # 唯一需要改的配置
+├── src/
+│   ├── App.tsx               # 主题路由（极薄一层）
+│   ├── useInstaller.ts       # 共享状态 hook
+│   ├── types.ts              # 配置 + 主题协议
+│   └── themes/
+│       ├── aurora/
+│       ├── minimal/
+│       ├── cyberpunk/
+│       └── retro-mac/
+├── src-tauri/
+│   ├── src/
+│   │   ├── lib.rs            # 通用解压 + 命令分发
+│   │   └── platform/         # 跨平台抽象
+│   │       ├── windows.rs
+│   │       ├── macos.rs
+│   │       └── linux.rs
+│   ├── build.rs              # 读 config，写编译期常量
+│   └── payload/              # pack.js 生成
+├── scripts/
+│   ├── pack.js               # 一键打包：electron → 安装器
+│   └── gen-icons.mjs         # SVG → 全套平台图标
+├── packages/
+│   └── create-fancy-installer/  # npx 脚手架 CLI
+├── assets/logo.svg           # 项目主图标源
+└── examples/
+    └── hello-electron/       # 最小可工作 Electron 示例
+```
+
+## 演示模式
+
+如果 `src-tauri/payload/payload.tar.zst` 不存在或为空，`build.rs` 自动创建空文件让 Rust 编译通过；运行时 `run_installation` 检测到空 payload 后只模拟 0→100 的进度（约 3 秒），不写任何文件。这样不需要 Electron 项目也能预览 UI。
+
+## License
+
+[MIT](./LICENSE)
+
+## 致谢
+
+- [Tauri](https://tauri.app/) — 让 web 技术做 native installer 成为可能
+- [framer-motion](https://www.framer.com/motion/) — 流畅的入场/出场编排
+- [zstd](https://facebook.github.io/zstd/) — 比 zip 小 20-30% 的压缩

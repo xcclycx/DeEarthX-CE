@@ -1,0 +1,120 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./gaming.css";
+
+export default function GamingTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts, primaryColor } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error
+    "--gm-primary": primaryColor || "#00ff00",
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center gm-root" style={cssVars}>
+      <div className="gm-window glass-draggable">
+        
+        {/* RGB 流光边框 */}
+        <div className="gm-rgb-border" />
+        <div className="gm-rgb-glow" />
+
+        <div className="gm-inner">
+          <header data-tauri-drag-region>
+            <div className="gm-brand">
+              <img src={logo} alt="Logo" />
+              <span>{config.appDisplayName.toUpperCase()} // SETUP</span>
+            </div>
+            <button className="gm-close" onClick={state.close}>
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </header>
+
+          <main>
+            {step === 1 && (
+              <div className="gm-step gm-anim">
+                <div className="gm-hero">
+                  <h1>{texts.welcomeTitle}</h1>
+                  <p>{texts.welcomeSubtitle}</p>
+                </div>
+
+                <div className="gm-form">
+                  <div className="gm-label">INSTALL PATH</div>
+                  <div className="gm-input-group" onClick={state.selectPath}>
+                    <div className="gm-path" title={installPath}>{installPath}</div>
+                    <div className="gm-btn-sm">BROWSE</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="gm-step gm-anim gm-center">
+                <div className="gm-progress-container">
+                  <div className="gm-percent">{progress}%</div>
+                  
+                  <div className="gm-progress-bar">
+                    <div className="gm-progress-fill" style={{ width: `${progress}%` }}>
+                      <div className="gm-progress-rgb" />
+                    </div>
+                  </div>
+                  
+                  <div className="gm-status">{getStatusText()}</div>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="gm-step gm-anim">
+                <div className="gm-hero gm-center-content">
+                  <div className="gm-success-icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <path d="M22 4L12 14.01l-3-3" />
+                    </svg>
+                  </div>
+                  <h1>{texts.successTitle}</h1>
+                  <p>{texts.successSubtitle}</p>
+                </div>
+
+                <div className="gm-features">
+                  {texts.features.map((f, i) => (
+                    <div key={f.label} className="gm-feature-card" style={{ animationDelay: `${i*0.1}s` }}>
+                      {f.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </main>
+
+          <footer>
+            {step === 1 && (
+              <>
+                <a href="#" className="gm-link">{texts.licenseAgreement}</a>
+                <button className="gm-btn" onClick={state.startInstall}>
+                  <div className="gm-btn-content">{texts.installButton}</div>
+                </button>
+              </>
+            )}
+            {step === 3 && (
+              <button className="gm-btn gm-btn-full" onClick={state.launch}>
+                <div className="gm-btn-content">{texts.launchButton}</div>
+              </button>
+            )}
+          </footer>
+        </div>
+      </div>
+    </div>
+  );
+}

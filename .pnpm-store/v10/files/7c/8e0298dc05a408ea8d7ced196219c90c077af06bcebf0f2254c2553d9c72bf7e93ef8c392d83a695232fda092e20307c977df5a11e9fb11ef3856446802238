@@ -1,0 +1,133 @@
+import type { ThemeProps } from "../../types";
+import "./titanium.css";
+
+export default function TitaniumTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center titanium-root">
+      <div className="console-window glass-draggable">
+        {/* 左侧：窄边控制台状态侧栏 */}
+        <div className="sidebar" data-tauri-drag-region>
+          <div className="brand-zone">
+            <div className="brand-dot"></div>
+            <div className="brand-text">{config.appDisplayName.toUpperCase()}</div>
+          </div>
+
+          {/* 侧栏步骤 */}
+          <div className="nav-steps">
+            <div className={`nav-item ${step === 1 ? 'active' : step > 1 ? 'completed' : ''}`}>
+              <div className="nav-dot"></div>
+              <span>01 准备部署</span>
+            </div>
+            <div className={`nav-item ${step === 2 ? 'active' : step > 2 ? 'completed' : ''}`}>
+              <div className="nav-dot"></div>
+              <span>02 系统解压</span>
+            </div>
+            <div className={`nav-item ${step === 3 ? 'active' : ''}`}>
+              <div className="nav-dot"></div>
+              <span>03 启幕运行</span>
+            </div>
+          </div>
+
+          <div className="version-tag">版本 {config.appVersion} PRO</div>
+        </div>
+
+        {/* 右侧：核心控制台面板 */}
+        <div className="main-panel">
+          <div className="main-header" data-tauri-drag-region>
+            <div className="ti-drag-space" data-tauri-drag-region>
+              <button className="ti-close-btn" onClick={state.close}>×</button>
+            </div>
+            <h1>
+              {step === 1 && "系统部署准备"}
+              {step === 2 && "核心正在部署"}
+              {step === 3 && "系统就绪"}
+            </h1>
+          </div>
+
+          {/* 内嵌物理声学舱 */}
+          <div className="bay-area">
+            <div className="acoustic-bay">
+              {/* 步骤 1 面板 */}
+              {step === 1 && (
+                <div className="panel-container active ti-anim">
+                  <p>{texts.welcomeSubtitle}</p>
+                  <div className="path-slot" onClick={state.selectPath}>
+                    <div className="path-text" title={installPath}>{installPath}</div>
+                    <button className="btn-change">更改位置</button>
+                  </div>
+                </div>
+              )}
+
+              {/* 步骤 2 面板 */}
+              {step === 2 && (
+                <div className="panel-container active ti-anim progress-overlay">
+                  <div className="precision-pct">{progress < 10 ? '0' : ''}{progress}%</div>
+                  <div className="progress-subtext">{getStatusText()}</div>
+                </div>
+              )}
+
+              {/* 步骤 3 面板 */}
+              {step === 3 && (
+                <div className="panel-container active ti-anim panel-success">
+                  <div className="success-indicator">部署完毕</div>
+                  <div className="success-desc">{texts.successSubtitle}</div>
+                </div>
+              )}
+
+              {/* 精密声波等高柱（背景律动） */}
+              <div className={`equalizer-grid ${step === 2 ? 'running' : step === 3 ? 'success' : 'hidden'}`}>
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="equalizer-bar"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 底部操作栏 */}
+          <div className="footer-bar">
+            {step === 1 && (
+              <>
+                <div className="protocol-box">
+                  我已接受并授权 <a href="#">{texts.licenseAgreement}</a>
+                </div>
+                <div className="action-group">
+                  <button className="btn btn-secondary" onClick={state.close}>取消</button>
+                  <button className="btn btn-primary" onClick={state.startInstall}>{texts.installButton}</button>
+                </div>
+              </>
+            )}
+            
+            {step === 2 && (
+              <>
+                <div className="protocol-box">核心解压中...</div>
+                <div className="action-group">
+                  <button className="btn btn-primary" disabled>运行中...</button>
+                </div>
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <div className="protocol-box"></div>
+                <div className="action-group">
+                  <button className="btn btn-primary" onClick={state.launch}>即刻运行</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

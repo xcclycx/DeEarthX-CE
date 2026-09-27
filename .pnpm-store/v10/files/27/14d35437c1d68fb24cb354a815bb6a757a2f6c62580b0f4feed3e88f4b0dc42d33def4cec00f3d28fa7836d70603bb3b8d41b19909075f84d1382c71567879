@@ -1,0 +1,407 @@
+#!/usr/bin/env node
+// scripts/pack.js —— 一键把目标 Electron 项目打成自定义 UI 安装器
+//
+// 用法（在 installer 目录内）:
+//   node scripts/pack.js                     # 用默认值：电子项目 = ..
+//   node scripts/pack.js --electron ../other # 指定 electron 项目根
+//   node scripts/pack.js --skip-build        # 跳过 tauri build（仅刷新 payload + 配置）
+//
+// 流程:
+//   1) 读取 electron 项目 package.json 的元信息
+//   2) 定位 release/win-unpacked 与其中的主 exe
+//   3) 写 installer.config.json + 同步 tauri.conf.json
+//   4) 用 electron 项目的图标重新生成 Tauri 全套 icons
+//   5) 把 win-unpacked 压成 src-tauri/payload/payload.zip
+//   6) 调 `npm run tauri:build` 产出最终安装器
+
+import { execSync, spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import tar from "tar-stream";
+import { compress as zstdCompress } from "@mongodb-js/zstd";
+
+// 跳过这些文件可以白白省体积（电子项目里很常见的大块头垃圾）
+const SKIP_PATTERNS = [
+  /LICENSES\.chromium\.html$/i,
+  /[/\\]LICENSE(\.txt)?$/i,
+];
+
+function shouldSkip(relPath) {
+  return SKIP_PATTERNS.some((re) => re.test(relPath));
+}
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const INSTALLER_ROOT = path.resolve(__dirname, "..");
+
+function parseArgs(argv) {
+  const out = { electron: null, skipBuild: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--electron") out.electron = argv[++i];
+    else if (a === "--skip-build") out.skipBuild = true;
+  }
+  return out;
+}
+
+function log(msg) {
+  console.log(`[pack] ${msg}`);
+}
+
+function fail(msg) {
+  console.error(`[pack] ✗ ${msg}`);
+  process.exit(1);
+}
+
+function locateUnpacked(outputDir, appName) {
+  // Windows
+  const winDir = path.join(outputDir, "win-unpacked");
+  if (fs.existsSync(winDir)) {
+    const exe = findExeInDir(winDir);
+    if (!exe) fail(`${winDir} 里没找到主 exe`);
+    return { unpacked: winDir, exeName: exe, platform: "windows" };
+  }
+  // macOS（mac / mac-arm64 / mac-universal）
+  for (const sub of ["mac", "mac-arm64", "mac-universal"]) {
+    const dir = path.join(outputDir, sub);
+    if (!fs.existsSync(dir)) continue;
+    const appDir = fs.readdirSync(dir).find((n) => n.endsWith(".app"));
+    if (appDir) {
+      // .app bundle 自身就是"安装产物"，整个目录都当 payload
+      return {
+        unpacked: path.join(dir, appDir),
+        exeName: appDir, // 在 macOS 上 exeName 其实是 .app bundle 名（被 platform/macos.rs 用作 /Applications/<name>.app）
+        platform: "macos",
+      };
+    }
+  }
+  // Linux
+  const linuxDir = path.join(outputDir, "linux-unpacked");
+  if (fs.existsSync(linuxDir)) {
+    // electron-builder 的 linux 产物里主 exe 没后缀，找一个可执行文件
+    const entries = fs.readdirSync(linuxDir).filter((n) => {
+      const full = path.join(linuxDir, n);
+      try {
+        const st = fs.statSync(full);
+        return st.isFile() && /^[a-z0-9_-]+$/i.test(n);
+      } catch {
+        return false;
+      }
+    });
+    const exe =
+      entries.find((n) => n.toLowerCase() === appName.toLowerCase()) ??
+      entries[0];
+    if (!exe) fail(`${linuxDir} 里没找到可执行文件`);
+    return { unpacked: linuxDir, exeName: exe, platform: "linux" };
+  }
+  fail(
+    `${outputDir} 下没找到任何 unpacked 目录（win-unpacked / mac*/ / linux-unpacked）`,
+  );
+}
+
+function findExeInDir(dir) {
+  const entries = fs.readdirSync(dir);
+  // 优先取根目录下的 exe；排除 elevate/uninstaller 这种工具
+  const exes = entries.filter(
+    (n) =>
+      n.toLowerCase().endsWith(".exe") &&
+      !/elevate|uninst|crash/i.test(n) &&
+      fs.statSync(path.join(dir, n)).isFile(),
+  );
+  if (exes.length === 0) return null;
+  // 选最大的（主程序通常最大）
+  exes.sort(
+    (a, b) =>
+      fs.statSync(path.join(dir, b)).size - fs.statSync(path.join(dir, a)).size,
+  );
+  return exes[0];
+}
+
+// 把目录打成 tar（流），再用 zstd 一次性压缩。比 zip+deflate 通常能省 20-30%。
+async function packDirToTarZst(srcDir, outFile) {
+  await fs.promises.mkdir(path.dirname(outFile), { recursive: true });
+
+  const pack = tar.pack();
+  const chunks = [];
+  pack.on("data", (c) => chunks.push(c));
+  const tarDone = new Promise((resolve, reject) => {
+    pack.on("end", resolve);
+    pack.on("error", reject);
+  });
+
+  let skipped = 0;
+  async function walk(dir, prefix) {
+    const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const full = path.join(dir, e.name);
+      const rel = prefix ? `${prefix}/${e.name}` : e.name;
+      if (e.isDirectory()) {
+        await walk(full, rel);
+      } else if (e.isFile()) {
+        if (shouldSkip(rel)) {
+          skipped += (await fs.promises.stat(full)).size;
+          continue;
+        }
+        const stat = await fs.promises.stat(full);
+        await new Promise((resolve, reject) => {
+          const entry = pack.entry(
+            { name: rel, size: stat.size, mode: stat.mode },
+            (err) => (err ? reject(err) : resolve()),
+          );
+          fs.createReadStream(full).pipe(entry);
+        });
+      }
+    }
+  }
+  await walk(srcDir, "");
+  pack.finalize();
+  await tarDone;
+
+  const tarBuf = Buffer.concat(chunks);
+  const zstdBuf = await zstdCompress(tarBuf, 19);
+  await fs.promises.writeFile(outFile, zstdBuf);
+  return { skipped, tarSize: tarBuf.length };
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const electronRoot = path.resolve(
+    INSTALLER_ROOT,
+    args.electron ?? "..",
+  );
+
+  log(`installer 根目录: ${INSTALLER_ROOT}`);
+  log(`electron 项目: ${electronRoot}`);
+
+  // 1. 读 electron package.json
+  const epkgPath = path.join(electronRoot, "package.json");
+  if (!fs.existsSync(epkgPath))
+    fail(`找不到 ${epkgPath}，请用 --electron 指定正确路径`);
+  const epkg = JSON.parse(fs.readFileSync(epkgPath, "utf8"));
+  const build = epkg.build ?? {};
+  const win = build.win ?? {};
+
+  const appName = build.productName || epkg.productName || epkg.name || "App";
+  const appDisplayName = build.productName || appName;
+  const appPublisher = build.publisherName || epkg.author?.name || epkg.author || "Unknown";
+  const appVersion = epkg.version || "1.0.0";
+  const appDescription = epkg.description || `${appName} Installer`;
+  const appIdentifier = build.appId || `com.${appName.toLowerCase()}.app`;
+
+  // 2. 找解包目录（跨平台）：win-unpacked / mac[-arm64]/<App>.app / linux-unpacked
+  const outputDir = path.resolve(electronRoot, build.directories?.output ?? "release");
+  const { unpacked, exeName, platform: targetPlatform } = locateUnpacked(outputDir, appName);
+  log(`平台: ${targetPlatform}`);
+  log(`解包目录: ${unpacked}`);
+  log(`检测到主程序: ${exeName}`);
+
+  // 3. 合并写入 installer.config.json
+  //    identity 字段（appName 等）从 electron 项目自动推断
+  //    主题/颜色/文案 字段保留用户已有的自定义
+  const identity = {
+    appName: appName.replace(/\s+/g, ""),
+    appDisplayName,
+    appPublisher: String(appPublisher),
+    appVersion,
+    exeName,
+    appDescription,
+    appIdentifier,
+  };
+  const cfgPath = path.join(INSTALLER_ROOT, "installer.config.json");
+  let existing = {};
+  if (fs.existsSync(cfgPath)) {
+    try {
+      existing = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+    } catch (e) {
+      log(`⚠ 解析现有 installer.config.json 失败，将覆盖: ${e.message}`);
+    }
+  }
+  const config = { ...existing, ...identity };
+  fs.writeFileSync(cfgPath, JSON.stringify(config, null, 2) + "\n");
+  log(`已同步 ${path.relative(INSTALLER_ROOT, cfgPath)}（identity 字段已更新，主题/文案已保留）`);
+
+  // 4. 同步 tauri.conf.json
+  const tauriCfgPath = path.join(INSTALLER_ROOT, "src-tauri", "tauri.conf.json");
+  const tauriCfg = JSON.parse(fs.readFileSync(tauriCfgPath, "utf8"));
+  tauriCfg.productName = config.appName;
+  tauriCfg.version = config.appVersion;
+  tauriCfg.identifier = config.appIdentifier;
+  if (tauriCfg.app?.windows?.[0]) {
+    tauriCfg.app.windows[0].title = `${config.appDisplayName} 安装程序`;
+  }
+  // 关键：关闭 bundle —— payload 已经通过 include_bytes! 嵌入 exe，
+  // 不需要再被 NSIS 包一层、也不需要重复打成 resource
+  tauriCfg.bundle = { active: false, targets: [] };
+  fs.writeFileSync(tauriCfgPath, JSON.stringify(tauriCfg, null, 2) + "\n");
+  log(`已同步 tauri.conf.json`);
+
+  // 5. 重新生成 Tauri 图标（用 electron 项目的图标）
+  const iconCandidates = [
+    win.icon,
+    "build/icon.png",
+    "resources/icon.png",
+    "resources/icon.ico",
+    "logo.png",
+  ].filter(Boolean);
+  let srcIcon = null;
+  for (const rel of iconCandidates) {
+    const p = path.resolve(electronRoot, rel);
+    if (fs.existsSync(p)) {
+      srcIcon = p;
+      break;
+    }
+  }
+  if (srcIcon && /\.png$/i.test(srcIcon)) {
+    log(`使用图标: ${srcIcon}`);
+    // Tauri 要求源图至少 1024x1024，否则会 panic。先用 sharp pad/upscale 一下保证尺寸达标。
+    let iconForTauri = srcIcon;
+    try {
+      const sharp = (await import("sharp")).default;
+      const meta = await sharp(srcIcon).metadata();
+      if ((meta.width ?? 0) < 1024 || (meta.height ?? 0) < 1024) {
+        const tmp = path.join(INSTALLER_ROOT, "src-tauri", "icons", "_src1024.png");
+        await sharp(srcIcon)
+          .resize(1024, 1024, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .png()
+          .toFile(tmp);
+        iconForTauri = tmp;
+        log(`图标原尺寸 ${meta.width}x${meta.height}，已放大到 1024x1024`);
+      }
+    } catch (e) {
+      log(`sharp 预处理失败，直接传原图: ${e.message}`);
+    }
+
+    const r = spawnSync(
+      process.platform === "win32" ? "npx.cmd" : "npx",
+      ["tauri", "icon", iconForTauri],
+      { cwd: INSTALLER_ROOT, shell: process.platform === "win32", encoding: "utf8" },
+    );
+    if (r.status !== 0) {
+      log("⚠ 生成图标失败，沿用现有 icons/");
+      if (r.stdout) console.log(r.stdout);
+      if (r.stderr) console.error(r.stderr);
+      if (r.error) console.error(r.error.message);
+    } else {
+      log("图标已重新生成");
+    }
+  } else {
+    log("⚠ 没找到 PNG 图标，沿用现有 icons/");
+  }
+
+  // 6. 压缩 win-unpacked 为 payload.tar.zst（比 zip 省 20-30%）
+  const payload = path.join(
+    INSTALLER_ROOT,
+    "src-tauri",
+    "payload",
+    "payload.tar.zst",
+  );
+  // 顺手清掉旧的 payload.zip
+  const oldZip = path.join(INSTALLER_ROOT, "src-tauri", "payload", "payload.zip");
+  if (fs.existsSync(oldZip)) fs.unlinkSync(oldZip);
+
+  log(`打包 + zstd-19 压缩 ${unpacked} → ${path.relative(INSTALLER_ROOT, payload)} ...`);
+  const { skipped, tarSize } = await packDirToTarZst(unpacked, payload);
+  const size = fs.statSync(payload).size;
+  log(
+    `payload: ${(size / 1024 / 1024).toFixed(1)} MB  ` +
+      `(原始 ${(tarSize / 1024 / 1024).toFixed(1)} MB，已跳过 ${(skipped / 1024 / 1024).toFixed(1)} MB 冗余)`,
+  );
+
+  if (args.skipBuild) {
+    log("已跳过 tauri build。运行 `npm run tauri:build` 自行打包。");
+    return;
+  }
+
+  // 7. 调 tauri build（关闭了 bundle，只编译原生 exe，速度更快、体积更小）
+  log("开始 tauri build...");
+  execSync("npm run tauri:build", { cwd: INSTALLER_ROOT, stdio: "inherit" });
+
+  // 8. 把 target/release 下的主 exe 复制到 installer/dist-installer/
+  const releaseDir = path.join(
+    INSTALLER_ROOT,
+    "src-tauri",
+    "target",
+    "release",
+  );
+  const builtExe = fs
+    .readdirSync(releaseDir)
+    .filter(
+      (f) =>
+        f.toLowerCase().endsWith(".exe") &&
+        fs.statSync(path.join(releaseDir, f)).isFile(),
+    )
+    .sort(
+      (a, b) =>
+        fs.statSync(path.join(releaseDir, b)).size -
+        fs.statSync(path.join(releaseDir, a)).size,
+    )[0];
+
+  if (!builtExe) {
+    log("⚠ 没在 target/release 里找到 exe");
+    return;
+  }
+
+  // 输出到 electron 项目的 release/ 目录，跟 electron-builder 的产物放一起，易找
+  const outDir = outputDir;
+  fs.mkdirSync(outDir, { recursive: true });
+  const outName = `${config.appDisplayName.replace(/\s+/g, "")}-Setup-${config.appVersion}.exe`;
+  const outPath = path.join(outDir, outName);
+  fs.copyFileSync(path.join(releaseDir, builtExe), outPath);
+  const sz = (fs.statSync(outPath).size / 1024 / 1024).toFixed(1);
+
+  // 清理大文件：payload + target（编译产物已经拷走了，留着只占盘）
+  const cleanupTargets = [
+    path.join(INSTALLER_ROOT, "src-tauri", "payload"),
+    path.join(INSTALLER_ROOT, "src-tauri", "target"),
+  ];
+  let freed = 0;
+  for (const p of cleanupTargets) {
+    if (!fs.existsSync(p)) continue;
+    try {
+      // 估算释放的空间
+      const sz = dirSize(p);
+      fs.rmSync(p, { recursive: true, force: true });
+      freed += sz;
+      log(`已清理 ${path.relative(INSTALLER_ROOT, p)}`);
+    } catch (e) {
+      log(`⚠ 清理 ${p} 失败: ${e.message}`);
+    }
+  }
+
+  console.log("");
+  console.log("=".repeat(60));
+  log(`✓ 安装器已生成`);
+  log(`  路径: ${outPath}`);
+  log(`  大小: ${sz} MB`);
+  if (freed > 0) log(`  释放磁盘: ${(freed / 1024 / 1024 / 1024).toFixed(2)} GB`);
+  console.log("=".repeat(60));
+}
+
+function dirSize(p) {
+  let total = 0;
+  const stack = [p];
+  while (stack.length) {
+    const cur = stack.pop();
+    let entries;
+    try {
+      entries = fs.readdirSync(cur, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const e of entries) {
+      const full = path.join(cur, e.name);
+      if (e.isDirectory()) stack.push(full);
+      else {
+        try {
+          total += fs.statSync(full).size;
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+  return total;
+}
+
+main().catch((e) => fail(e.stack || e.message));

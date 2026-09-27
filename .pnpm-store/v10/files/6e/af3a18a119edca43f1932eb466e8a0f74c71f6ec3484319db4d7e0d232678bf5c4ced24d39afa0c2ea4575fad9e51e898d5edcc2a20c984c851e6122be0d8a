@@ -1,0 +1,39 @@
+// 跨平台抽象：每个平台实现 install_finalize / launch_installed_app / default_install_root。
+// install_finalize 在文件解压完成后调用，负责创建快捷方式、写卸载信息等平台特有动作。
+
+use std::path::PathBuf;
+use tauri::AppHandle;
+
+#[cfg(target_os = "windows")]
+mod windows;
+#[cfg(target_os = "windows")]
+pub use windows::{default_install_root, install_finalize, launch_installed_app};
+
+#[cfg(target_os = "macos")]
+mod macos;
+#[cfg(target_os = "macos")]
+pub use macos::{default_install_root, install_finalize, launch_installed_app};
+
+#[cfg(target_os = "linux")]
+mod linux;
+#[cfg(target_os = "linux")]
+pub use linux::{default_install_root, install_finalize, launch_installed_app};
+
+pub struct InstallContext<'a> {
+    pub install_dir: &'a std::path::Path,
+    pub app_name: &'static str,
+    pub app_display_name: &'static str,
+    pub app_publisher: &'static str,
+    pub app_version: &'static str,
+    pub exe_name: &'static str,
+    pub app: &'a AppHandle,
+}
+
+pub type LogFn<'a> = &'a (dyn Fn(String) + Send + Sync);
+
+#[allow(dead_code)]
+pub fn placeholder_root(app: &AppHandle, app_name: &str) -> Result<PathBuf, String> {
+    use tauri::Manager;
+    let base = app.path().local_data_dir().map_err(|e| e.to_string())?;
+    Ok(base.join(app_name))
+}

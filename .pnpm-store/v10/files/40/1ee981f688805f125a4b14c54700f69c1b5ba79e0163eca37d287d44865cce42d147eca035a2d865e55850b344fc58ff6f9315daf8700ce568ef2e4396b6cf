@@ -1,0 +1,117 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./hyperspace.css";
+
+export default function HyperspaceTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center hs-root">
+      
+      {/* 超空间星空背景特效 (纯 CSS 构建多层繁星) */}
+      <div className="hs-space-bg">
+        <div className="hs-stars hs-stars-1"></div>
+        <div className="hs-stars hs-stars-2"></div>
+        <div className="hs-stars hs-stars-3"></div>
+      </div>
+
+      <div className="hs-window glass-draggable">
+        <header data-tauri-drag-region>
+          <div className="hs-brand">
+            <img src={logo} alt="Logo" />
+            <span>{config.appDisplayName}</span>
+          </div>
+          <button className="hs-close" onClick={state.close}>
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="hs-step hs-anim-warp">
+              <div className="hs-hero">
+                <h1>{texts.welcomeTitle}</h1>
+                <p>{texts.welcomeSubtitle}</p>
+              </div>
+
+              <div className="hs-form">
+                <label>Landing Zone</label>
+                <div className="hs-input-box" onClick={state.selectPath}>
+                  <div className="hs-path" title={installPath}>{installPath}</div>
+                  <button className="hs-btn-sm">Modify</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="hs-step hs-anim-warp hs-center">
+              <div className="hs-warp-tunnel">
+                {/* 跃迁隧道视效 */}
+                <div className="hs-tunnel-ring hs-tunnel-ring-1" style={{ opacity: progress > 10 ? 1 : 0.2 }}></div>
+                <div className="hs-tunnel-ring hs-tunnel-ring-2" style={{ opacity: progress > 40 ? 1 : 0.2 }}></div>
+                <div className="hs-tunnel-ring hs-tunnel-ring-3" style={{ opacity: progress > 70 ? 1 : 0.2 }}></div>
+                <div className="hs-percent">{progress}%</div>
+              </div>
+              <div className="hs-progress-bar">
+                <div className="hs-progress-fill" style={{ width: `${progress}%` }}></div>
+              </div>
+              <div className="hs-status">{getStatusText()}</div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="hs-step hs-anim-warp">
+              <div className="hs-hero hs-center-content">
+                <div className="hs-success-icon">
+                  <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="M22 4L12 14.01l-3-3" />
+                  </svg>
+                </div>
+                <h1>{texts.successTitle}</h1>
+                <p>{texts.successSubtitle}</p>
+              </div>
+
+              <div className="hs-features">
+                {texts.features.map((f, i) => (
+                  <div key={f.label} className="hs-feature-pill" style={{ animationDelay: `${i*0.1}s` }}>
+                    <span className="hs-dot" style={{ backgroundColor: f.color }} />
+                    {f.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+
+        <footer>
+          {step === 1 && (
+            <>
+              <a href="#" className="hs-link">{texts.licenseAgreement}</a>
+              <button className="hs-btn" onClick={state.startInstall}>
+                {texts.installButton}
+              </button>
+            </>
+          )}
+          {step === 3 && (
+            <button className="hs-btn hs-btn-full" onClick={state.launch}>
+              {texts.launchButton}
+            </button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}

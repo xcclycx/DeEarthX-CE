@@ -1,0 +1,22 @@
+# hello-electron
+
+fancy-installer 的最小可工作 Electron 示例 —— 用来端到端验证 `npm run pack` 流程。
+
+## 三条命令完成端到端测试
+
+```bash
+# 1) 安装 Electron + electron-builder
+cd examples/hello-electron
+npm install
+
+# 2) 产出 release/win-unpacked
+npm run build:unpack
+
+# 3) 回到 fancy-installer 根目录，调用 pack
+cd ../..
+npm run pack -- --electron examples/hello-electron
+```
+
+完成后会在 `examples/hello-electron/release/` 目录里看到
+`HelloElectron-Setup-1.0.0.exe` —— 双击它即是一个完整的 fancy-installer
+体验：欢迎页 → 进度页 → 成功页 → 启动按钮拉起真正的 Hello Electron 窗口。

@@ -1,0 +1,15 @@
+{
+  "templates": [
+    {
+      "id": "Fabric-1.20.1-dex",
+      "name": "Fabric-1.20.1-dex",
+      "description": "Fabric1.20.1版本",
+      "size": "108.6MB",
+      "downloadUrls": [
+        "https://pan.xcclyc.cn/f/pjfR/xccdex-official-fabric-1.20.1-0.18.4.zip"
+      ],
+      "version": "0.18.4",
+      "tag": "dex"
+    }
+  ]
+}

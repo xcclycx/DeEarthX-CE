@@ -1,0 +1,305 @@
+/* Synthwave 80年代复古霓虹风 */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;1,900&display=swap');
+
+.synth-root {
+  --sw-bg: #090220;
+  --sw-grid: #ff00ff;
+  --sw-pink: #ff00a0;
+  --sw-cyan: #00ffff;
+  --sw-text: #ffffff;
+  
+  font-family: 'Montserrat', sans-serif;
+  background: transparent;
+  color: var(--sw-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.synth-window {
+  width: 640px;
+  height: 480px;
+  background: var(--sw-bg);
+  border: 2px solid var(--sw-cyan);
+  box-shadow: 0 0 20px var(--sw-cyan), inset 0 0 30px rgba(0, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* 动态透视网格 */
+.synth-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.synth-sun {
+  position: absolute;
+  bottom: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(to bottom, #ffea00, #ff00a0);
+  border-radius: 50%;
+  box-shadow: 0 0 40px #ff00a0;
+  mask-image: linear-gradient(to bottom, black 40%, transparent 40%, transparent 45%, black 45%, black 55%, transparent 55%, transparent 60%, black 60%, black 75%, transparent 75%, transparent 80%, black 80%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 40%, transparent 45%, black 45%, black 55%, transparent 55%, transparent 60%, black 60%, black 75%, transparent 75%, transparent 80%, black 80%);
+}
+
+.synth-grid {
+  position: absolute;
+  bottom: -50%;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(255, 0, 255, 0.5) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 0, 255, 0.5) 2px, transparent 2px);
+  background-size: 40px 40px;
+  transform: perspective(300px) rotateX(60deg);
+  animation: synthGridMove 2s linear infinite;
+}
+
+@keyframes synthGridMove {
+  from { background-position: 0 0; }
+  to { background-position: 0 40px; }
+}
+
+header {
+  position: relative;
+  z-index: 1;
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background: rgba(9, 2, 32, 0.8);
+  border-bottom: 1px solid var(--sw-pink);
+  -webkit-app-region: drag;
+}
+
+.synth-brand {
+  font-style: italic;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--sw-text);
+  text-shadow: 2px 2px 0 var(--sw-pink);
+  letter-spacing: 2px;
+}
+
+.synth-close {
+  background: transparent;
+  border: none;
+  color: var(--sw-cyan);
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.synth-close:hover {
+  color: var(--sw-pink);
+  text-shadow: 0 0 10px var(--sw-pink);
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.synth-step {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(9, 2, 32, 0.6); /* 半透明底色增强可读性 */
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.synth-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.synth-anim {
+  animation: swFadeIn 0.5s ease forwards;
+}
+
+@keyframes swFadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.synth-glow-text {
+  font-size: 32px;
+  font-weight: 900;
+  font-style: italic;
+  margin: 0 0 8px;
+  color: var(--sw-pink);
+  text-shadow: 0 0 10px var(--sw-pink), 0 0 20px var(--sw-pink), 2px 2px 0 var(--sw-cyan);
+  text-transform: uppercase;
+}
+
+.synth-sub {
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 0 0 4px #fff;
+  margin-bottom: 24px;
+}
+
+.synth-form {
+  margin-top: auto;
+}
+
+.synth-form label {
+  display: block;
+  font-size: 12px;
+  color: var(--sw-cyan);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.synth-input-group {
+  display: flex;
+  background: rgba(0, 255, 255, 0.1);
+  border: 1px solid var(--sw-cyan);
+  align-items: center;
+  padding: 6px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.synth-input-group:hover {
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+.synth-path {
+  flex: 1;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.synth-btn-sm {
+  background: var(--sw-cyan);
+  color: var(--sw-bg);
+  border: none;
+  font-weight: 900;
+  font-style: italic;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+
+/* 进度条 */
+.synth-progress-container {
+  width: 100%;
+  text-align: center;
+}
+
+.synth-percent {
+  font-size: 64px;
+  font-weight: 900;
+  font-style: italic;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.synth-progress-bar {
+  height: 20px;
+  background: rgba(255, 0, 255, 0.2);
+  border: 2px solid var(--sw-pink);
+  box-shadow: 0 0 10px var(--sw-pink);
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.synth-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sw-pink), var(--sw-cyan));
+  box-shadow: 0 0 20px var(--sw-cyan);
+  transition: width 0.2s linear;
+}
+
+.synth-status {
+  font-size: 14px;
+  color: var(--sw-cyan);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* 特性标签 */
+.synth-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.synth-feature-item {
+  background: rgba(0, 255, 255, 0.1);
+  border-left: 4px solid var(--sw-cyan);
+  padding: 8px 16px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+/* Footer */
+footer {
+  position: relative;
+  z-index: 1;
+  padding: 16px 40px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.synth-link {
+  font-size: 12px;
+  color: var(--sw-text);
+  letter-spacing: 2px;
+  text-shadow: 0 0 4px #fff;
+}
+
+.synth-btn {
+  background: var(--sw-pink);
+  color: var(--sw-text);
+  border: 2px solid var(--sw-text);
+  box-shadow: 0 0 15px var(--sw-pink), inset 0 0 10px var(--sw-pink);
+  padding: 10px 32px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.synth-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px var(--sw-pink), inset 0 0 15px var(--sw-pink);
+}
+
+.synth-btn-cyan {
+  background: var(--sw-cyan);
+  color: var(--sw-bg);
+  border-color: var(--sw-text);
+  box-shadow: 0 0 15px var(--sw-cyan), inset 0 0 10px var(--sw-cyan);
+}
+.synth-btn-cyan:hover {
+  box-shadow: 0 0 25px var(--sw-cyan), inset 0 0 15px var(--sw-cyan);
+}

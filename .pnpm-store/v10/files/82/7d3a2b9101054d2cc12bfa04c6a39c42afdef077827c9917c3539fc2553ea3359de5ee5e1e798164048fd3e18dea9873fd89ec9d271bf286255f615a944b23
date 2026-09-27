@@ -1,0 +1,170 @@
+#!/usr/bin/env node
+// create-fancy-installer —— 拉取 fancy-installer 模板，初始化一个新项目
+//
+// 用法：
+//   npx create-fancy-installer <project-dir> [--theme aurora|minimal|geist|...]
+//                                            [--repo <git-url>] [--no-install]
+
+import { execSync, spawnSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import readline from "node:readline/promises";
+import { stdin, stdout } from "node:process";
+
+const DEFAULT_REPO = "https://github.com/lzyszds/fancy-installer.git";
+const THEMES = [
+  "aurora",
+  "minimal",
+  "geist",
+  "bento",
+  "coral",
+  "titanium",
+  "glass",
+  "neumorphic",
+  "synthwave",
+  "eco",
+  "plasma",
+  "hologram",
+  "liquid",
+  "gaming",
+  "hyperspace",
+];
+
+function parseArgs(argv) {
+  const out = {
+    dir: null,
+    theme: null,
+    repo: DEFAULT_REPO,
+    install: true,
+    appName: null,
+    exeName: null,
+    publisher: null,
+  };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--theme") out.theme = argv[++i];
+    else if (a === "--repo") out.repo = argv[++i];
+    else if (a === "--no-install") out.install = false;
+    else if (a === "--app-name") out.appName = argv[++i];
+    else if (a === "--exe-name") out.exeName = argv[++i];
+    else if (a === "--publisher") out.publisher = argv[++i];
+    else if (a === "-h" || a === "--help") {
+      printHelp();
+      process.exit(0);
+    } else if (!out.dir && !a.startsWith("-")) out.dir = a;
+  }
+  return out;
+}
+
+function printHelp() {
+  console.log(`
+create-fancy-installer
+
+USAGE
+  create-fancy-installer <project-dir> [options]
+
+OPTIONS
+  --theme <name>     初始主题 (${THEMES.join(" | ")})
+  --app-name <name>  应用名（appName / appDisplayName）
+  --exe-name <name>  可执行文件名
+  --publisher <name> 发行商
+  --repo <url>       模板 git 仓库（默认 ${DEFAULT_REPO}）
+  --no-install       跳过 npm install
+  -h, --help         显示帮助
+`);
+}
+
+async function prompt(q, fallback) {
+  const rl = readline.createInterface({ input: stdin, output: stdout });
+  try {
+    const a = (await rl.question(`${q}${fallback ? ` (${fallback})` : ""}: `)).trim();
+    return a || fallback;
+  } finally {
+    rl.close();
+  }
+}
+
+function run(cmd, args, opts = {}) {
+  const r = spawnSync(cmd, args, { stdio: "inherit", shell: process.platform === "win32", ...opts });
+  if (r.status !== 0) {
+    console.error(`✗ ${cmd} ${args.join(" ")} 失败 (exit ${r.status})`);
+    process.exit(r.status ?? 1);
+  }
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+
+  const dir = args.dir ?? (await prompt("项目目录名", "my-installer"));
+  const target = path.resolve(process.cwd(), dir);
+  if (fs.existsSync(target) && fs.readdirSync(target).length > 0) {
+    console.error(`✗ ${target} 已存在且非空`);
+    process.exit(1);
+  }
+
+  const theme = args.theme ?? (await prompt(`初始主题 [${THEMES.join("/")}]`, "aurora"));
+  if (!THEMES.includes(theme)) {
+    console.error(`✗ 未知主题 "${theme}"，可选：${THEMES.join(", ")}`);
+    process.exit(1);
+  }
+
+  const appName = args.appName ?? (await prompt("应用名（appName / appDisplayName）", path.basename(target)));
+  const exeName = args.exeName ?? (await prompt("可执行文件名", `${appName.replace(/\s+/g, "")}.exe`));
+  const publisher = args.publisher ?? (await prompt("发行商", "Your Company"));
+
+  console.log(`\n→ 克隆 ${args.repo} 到 ${target} ...`);
+  fs.mkdirSync(target, { recursive: true });
+  run("git", ["clone", "--depth", "1", args.repo, target]);
+
+  // 重置 git
+  fs.rmSync(path.join(target, ".git"), { recursive: true, force: true });
+
+  // 改写 installer.config.json
+  const cfgPath = path.join(target, "installer.config.json");
+  if (fs.existsSync(cfgPath)) {
+    const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+    cfg.appName = appName.replace(/\s+/g, "");
+    cfg.appDisplayName = appName;
+    cfg.exeName = exeName;
+    cfg.appPublisher = publisher;
+    cfg.appIdentifier = `com.${appName.toLowerCase().replace(/[^a-z0-9]/g, "")}.app`;
+    cfg.theme = theme;
+    fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2) + "\n");
+    console.log(`→ 已更新 installer.config.json`);
+  }
+
+  // npm install
+  if (args.install) {
+    console.log("\n→ 安装依赖...");
+    run("npm", ["install"], { cwd: target });
+  }
+
+  // 初始化新的 git 仓库
+  try {
+    execSync("git init", { cwd: target, stdio: "ignore" });
+    execSync("git add -A", { cwd: target, stdio: "ignore" });
+    execSync('git commit -m "init from fancy-installer"', {
+      cwd: target,
+      stdio: "ignore",
+      env: { ...process.env, GIT_COMMITTER_NAME: "fancy-installer", GIT_COMMITTER_EMAIL: "noreply@example.com", GIT_AUTHOR_NAME: "fancy-installer", GIT_AUTHOR_EMAIL: "noreply@example.com" },
+    });
+  } catch {
+    // git 不可用或失败，忽略
+  }
+
+  console.log(`
+✓ 完成！
+
+下一步：
+  cd ${dir}
+  npm run tauri:dev                              # 演示模式看 UI
+  npm run pack -- --electron ../path/to/electron # 打包真实安装器
+
+文档：https://github.com/lzyszds/fancy-installer
+`);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

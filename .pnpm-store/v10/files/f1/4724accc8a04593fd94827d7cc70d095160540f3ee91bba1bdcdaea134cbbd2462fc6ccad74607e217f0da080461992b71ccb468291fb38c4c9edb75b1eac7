@@ -1,0 +1,133 @@
+// fancy-installer 配置类型 —— 与 installer.config.json 一一对应。
+// Rust 端 get_app_config 命令会返回完整的 InstallerConfig（snake_case，由前端做映射或保持原样）。
+
+export interface ProgressFrame {
+  /** 进度上限百分比 */
+  limit: number;
+  /** 显示的状态文案 */
+  text: string;
+}
+
+export interface FeatureChip {
+  /** 胶囊文案 */
+  label: string;
+  /** 胶囊主色（HEX） */
+  color: string;
+}
+
+export interface InstallerTexts {
+  welcomeTitle: string;
+  welcomeSubtitle: string;
+  installButton: string;
+  licenseAgreement: string;
+  progressFrames: ProgressFrame[];
+  successTitle: string;
+  successSubtitle: string;
+  features: FeatureChip[];
+  launchButton: string;
+}
+
+export type ThemeName =
+  | "aurora"
+  | "minimal"
+  | "geist"
+  | "bento"
+  | "coral"
+  | "titanium"
+  | "glass"
+  | "neumorphic"
+  | "synthwave"
+  | "eco"
+  | "plasma"
+  | "hologram"
+  | "liquid"
+  | "gaming"
+  | "hyperspace";
+
+/** 与 Rust 端 AppConfig 对齐（serde 序列化为 snake_case）。 */
+export interface InstallerConfig {
+  app_name: string;
+  app_display_name: string;
+  app_publisher: string;
+  app_version: string;
+  exe_name: string;
+  app_description: string;
+  app_identifier: string;
+
+  theme: ThemeName;
+  primary_color: string;
+  accent_color: string;
+  success_color: string;
+
+  texts: {
+    welcome_title: string;
+    welcome_subtitle: string;
+    install_button: string;
+    license_agreement: string;
+    progress_frames: ProgressFrame[];
+    success_title: string;
+    success_subtitle: string;
+    features: FeatureChip[];
+    launch_button: string;
+  };
+}
+
+/** 前端组件接收的规范化配置（驼峰命名）。 */
+export interface NormalizedConfig {
+  appName: string;
+  appDisplayName: string;
+  appPublisher: string;
+  appVersion: string;
+  exeName: string;
+  appDescription: string;
+  appIdentifier: string;
+  theme: ThemeName;
+  primaryColor: string;
+  accentColor: string;
+  successColor: string;
+  texts: InstallerTexts;
+}
+
+export function normalizeConfig(raw: InstallerConfig): NormalizedConfig {
+  return {
+    appName: raw.app_name,
+    appDisplayName: raw.app_display_name,
+    appPublisher: raw.app_publisher,
+    appVersion: raw.app_version,
+    exeName: raw.exe_name,
+    appDescription: raw.app_description,
+    appIdentifier: raw.app_identifier,
+    theme: raw.theme,
+    primaryColor: raw.primary_color,
+    accentColor: raw.accent_color,
+    successColor: raw.success_color,
+    texts: {
+      welcomeTitle: raw.texts.welcome_title,
+      welcomeSubtitle: raw.texts.welcome_subtitle,
+      installButton: raw.texts.install_button,
+      licenseAgreement: raw.texts.license_agreement,
+      progressFrames: raw.texts.progress_frames,
+      successTitle: raw.texts.success_title,
+      successSubtitle: raw.texts.success_subtitle,
+      features: raw.texts.features,
+      launchButton: raw.texts.launch_button,
+    },
+  };
+}
+
+export interface InstallerState {
+  step: 1 | 2 | 3;
+  progress: number;
+  installPath: string;
+  setInstallPath: (path: string) => void;
+  startInstall: () => Promise<void>;
+  selectPath: () => Promise<void>;
+  launch: () => Promise<void>;
+  close: () => Promise<void>;
+}
+
+/** 每个主题都是一个组件，接收完整状态 + 配置。 */
+export interface ThemeProps {
+  config: NormalizedConfig;
+  state: InstallerState;
+}

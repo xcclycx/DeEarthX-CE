@@ -1,0 +1,304 @@
+/* Minimal 主题 —— 浅色、克制、品牌中性 */
+
+.minimal-root {
+  --m-bg: #ffffff;
+  --m-text: #0f172a;
+  --m-text-muted: #64748b;
+  --m-border: #e2e8f0;
+  --m-bg-soft: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: transparent;
+}
+
+.minimal-card {
+  width: 420px;
+  height: 480px;
+  background: var(--m-bg);
+  border-radius: 14px;
+  border: 1px solid var(--m-border);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15), 0 2px 8px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.minimal-card header {
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--m-border);
+  flex-shrink: 0;
+}
+
+.minimal-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--m-text);
+}
+
+.minimal-brand img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.minimal-close {
+  border: 0;
+  background: transparent;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--m-text-muted);
+  font-size: 18px;
+  line-height: 1;
+  -webkit-app-region: no-drag;
+}
+
+.minimal-close:hover {
+  background: var(--m-bg-soft);
+  color: var(--m-text);
+}
+
+.minimal-progress-track {
+  height: 2px;
+  background: var(--m-bg-soft);
+  flex-shrink: 0;
+}
+
+.minimal-progress-fill {
+  height: 100%;
+  background: var(--theme-primary);
+  transition: width 0.3s ease;
+}
+
+.minimal-card main {
+  flex: 1;
+  padding: 28px 32px 16px;
+  overflow: hidden;
+}
+
+.minimal-step {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: minimalFadeIn 0.4s ease;
+}
+
+@keyframes minimalFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.minimal-step h1,
+.minimal-step h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--m-text);
+  letter-spacing: -0.01em;
+}
+
+.minimal-sub {
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--m-text-muted);
+  line-height: 1.5;
+}
+
+.minimal-path {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.minimal-path-label {
+  font-size: 12px;
+  color: var(--m-text-muted);
+}
+
+.minimal-path-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  background: var(--m-bg);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: ui-monospace, Menlo, monospace;
+  color: var(--m-text);
+  text-align: left;
+  width: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.minimal-path-input > span:first-child {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12px;
+}
+
+.minimal-path-input:hover {
+  border-color: var(--theme-primary);
+  background: var(--m-bg-soft);
+}
+
+.minimal-path-pick {
+  color: var(--theme-primary);
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.minimal-meta {
+  margin-top: auto;
+  font-size: 11px;
+  color: var(--m-text-muted);
+  display: flex;
+  gap: 6px;
+}
+
+/* Step 2 */
+.minimal-step-2 {
+  align-items: center;
+  justify-content: center;
+}
+
+.minimal-spinner {
+  width: 56px;
+  height: 56px;
+  border: 3px solid var(--m-bg-soft);
+  border-top-color: var(--theme-primary);
+  border-radius: 50%;
+  animation: minimalSpin 0.9s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes minimalSpin {
+  to { transform: rotate(360deg); }
+}
+
+.minimal-percent {
+  font-size: 36px;
+  font-weight: 200;
+  color: var(--m-text);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 6px;
+}
+
+.minimal-status {
+  font-size: 12px;
+  color: var(--m-text-muted);
+}
+
+/* Step 3 */
+.minimal-step-3 {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.minimal-check {
+  margin-bottom: 16px;
+}
+
+.minimal-check-circle {
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  animation: minimalDraw 0.6s ease-out forwards;
+}
+
+.minimal-check-tick {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: minimalDraw 0.4s ease-out 0.5s forwards;
+}
+
+@keyframes minimalDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+.minimal-features {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin: 16px 0 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.minimal-features li {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--chip) 12%, transparent);
+  color: var(--chip);
+  border: 1px solid color-mix(in srgb, var(--chip) 25%, transparent);
+}
+
+/* footer */
+.minimal-card footer {
+  padding: 16px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.minimal-btn {
+  width: 100%;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: white;
+  transition: filter 0.2s ease, transform 0.2s ease;
+  -webkit-app-region: no-drag;
+}
+
+.minimal-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.minimal-btn-primary {
+  background: var(--theme-primary);
+}
+
+.minimal-btn-success {
+  background: var(--theme-success);
+}
+
+.minimal-license {
+  font-size: 11px;
+  color: var(--m-text-muted);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--m-border);
+}
+
+.minimal-license:hover {
+  color: var(--theme-primary);
+}
+
+/* 拖拽区域 */
+.glass-draggable {
+  -webkit-app-region: drag;
+}

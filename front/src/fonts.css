@@ -1,0 +1,11 @@
+@font-face {
+  font-family: 'DouYinMeiHaoTi';
+  src: url('../otf/DouYinMeiHaoTi.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: 'DouYinMeiHaoTi', sans-serif;
+}

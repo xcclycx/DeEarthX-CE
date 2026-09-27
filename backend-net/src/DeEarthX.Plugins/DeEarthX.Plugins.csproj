@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\DeEarthX.Infrastructure\DeEarthX.Infrastructure.csproj" />
+    <ProjectReference Include="..\DeEarthX.Realtime\DeEarthX.Realtime.csproj" />
+    <ProjectReference Include="..\DeEarthX.Core\DeEarthX.Core.csproj" />
+  </ItemGroup>
+</Project>

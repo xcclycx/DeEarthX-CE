@@ -1,0 +1,239 @@
+// fancy-installer Rust 入口（跨平台）
+// 平台特异逻辑全部下沉到 platform/{windows,macos,linux}.rs。
+// 这里只负责：配置加载、payload 解压、进度上报、5 个 Tauri command。
+
+mod platform;
+
+use std::fs;
+use std::io::{copy, Cursor, Read, Write};
+use std::path::PathBuf;
+use std::thread;
+use std::time::Duration;
+use tauri::{AppHandle, Emitter};
+
+const APP_NAME: &str = env!("INSTALLER_APP_NAME");
+const APP_DISPLAY_NAME: &str = env!("INSTALLER_APP_DISPLAY_NAME");
+const APP_PUBLISHER: &str = env!("INSTALLER_APP_PUBLISHER");
+const APP_VERSION: &str = env!("INSTALLER_APP_VERSION");
+const EXE_NAME: &str = env!("INSTALLER_EXE_NAME");
+
+static CONFIG_JSON: &str = include_str!("../../installer.config.json");
+static PAYLOAD_BYTES: &[u8] = include_bytes!("../payload/payload.tar.zst");
+
+fn is_demo_mode() -> bool {
+    PAYLOAD_BYTES.is_empty()
+}
+
+#[tauri::command]
+fn get_app_config() -> Result<serde_json::Value, String> {
+    let raw: serde_json::Value = serde_json::from_str(CONFIG_JSON)
+        .map_err(|e| format!("解析 installer.config.json 失败: {e}"))?;
+    Ok(camel_to_snake(&raw))
+}
+
+fn camel_to_snake(v: &serde_json::Value) -> serde_json::Value {
+    match v {
+        serde_json::Value::Object(map) => {
+            let mut out = serde_json::Map::new();
+            for (k, val) in map {
+                out.insert(to_snake(k), camel_to_snake(val));
+            }
+            serde_json::Value::Object(out)
+        }
+        serde_json::Value::Array(arr) => {
+            serde_json::Value::Array(arr.iter().map(camel_to_snake).collect())
+        }
+        _ => v.clone(),
+    }
+}
+
+fn to_snake(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 4);
+    for (i, ch) in s.chars().enumerate() {
+        if ch.is_ascii_uppercase() {
+            if i != 0 {
+                out.push('_');
+            }
+            out.extend(ch.to_lowercase());
+        } else {
+            out.push(ch);
+        }
+    }
+    out
+}
+
+#[tauri::command]
+async fn run_installation(app: AppHandle, path: String) -> Result<(), String> {
+    let install_dir = PathBuf::from(path);
+
+    if is_demo_mode() {
+        thread::spawn(move || {
+            let _ = app.emit(
+                "install-log",
+                "演示模式：未打包 payload，仅模拟进度".to_string(),
+            );
+            for pct in 1u32..=100 {
+                thread::sleep(Duration::from_millis(30));
+                let _ = app.emit("install-progress", pct);
+            }
+        });
+        return Ok(());
+    }
+
+    thread::spawn(move || {
+        let app2 = app.clone();
+        let emit_log = move |msg: String| {
+            let _ = app2.emit("install-log", msg);
+        };
+
+        if install_dir.exists() {
+            let _ = fs::remove_dir_all(&install_dir);
+        }
+        if let Err(e) = fs::create_dir_all(&install_dir) {
+            emit_log(format!("创建安装目录失败: {e}"));
+            return;
+        }
+
+        // 解 zstd → tar
+        let mut tar_buf: Vec<u8> = Vec::new();
+        {
+            let mut zstd_reader =
+                match zstd::stream::read::Decoder::new(Cursor::new(PAYLOAD_BYTES)) {
+                    Ok(d) => d,
+                    Err(e) => {
+                        emit_log(format!("zstd 解码失败: {e}"));
+                        return;
+                    }
+                };
+            if let Err(e) = zstd_reader.read_to_end(&mut tar_buf) {
+                emit_log(format!("zstd 读取失败: {e}"));
+                return;
+            }
+        }
+        let total = tar_buf.len() as u64;
+
+        let mut archive = tar::Archive::new(Cursor::new(&tar_buf));
+        let entries = match archive.entries() {
+            Ok(e) => e,
+            Err(e) => {
+                emit_log(format!("tar 读取失败: {e}"));
+                return;
+            }
+        };
+
+        let mut written: u64 = 0;
+        let mut last_pct: u32 = 0;
+        for entry_res in entries {
+            let mut entry = match entry_res {
+                Ok(e) => e,
+                Err(_) => continue,
+            };
+            let rel_path = match entry.path() {
+                Ok(p) => p.into_owned(),
+                Err(_) => continue,
+            };
+            let outpath = install_dir.join(&rel_path);
+            let entry_size = entry.size();
+            let ht = entry.header().entry_type();
+            if ht.is_dir() {
+                let _ = fs::create_dir_all(&outpath);
+            } else if ht.is_file() {
+                if let Some(p) = outpath.parent() {
+                    let _ = fs::create_dir_all(p);
+                }
+                match fs::File::create(&outpath) {
+                    Ok(mut f) => {
+                        let _ = copy(&mut entry, &mut f);
+                        let _ = f.flush();
+                        // 保留 unix 可执行位（macOS .app 内的 binary 必须可执行）
+                        #[cfg(unix)]
+                        {
+                            use std::os::unix::fs::PermissionsExt;
+                            if let Ok(mode) = entry.header().mode() {
+                                let _ = fs::set_permissions(
+                                    &outpath,
+                                    fs::Permissions::from_mode(mode),
+                                );
+                            }
+                        }
+                    }
+                    Err(e) => emit_log(format!("写入 {} 失败: {e}", outpath.display())),
+                }
+            } else if ht.is_symlink() {
+                #[cfg(unix)]
+                if let Ok(Some(target)) = entry.link_name() {
+                    let _ = std::os::unix::fs::symlink(target.as_ref(), &outpath);
+                }
+            }
+            written += entry_size;
+            let pct = if total > 0 {
+                (written * 95 / total) as u32
+            } else {
+                0
+            };
+            if pct != last_pct {
+                last_pct = pct;
+                let _ = app.emit("install-progress", pct);
+            }
+        }
+
+        // 平台收尾（快捷方式 / 注册表 / lsregister / .desktop）
+        let log_arc =
+            std::sync::Arc::new(move |m: String| emit_log(m)) as std::sync::Arc<dyn Fn(String) + Send + Sync>;
+        let ctx = platform::InstallContext {
+            install_dir: &install_dir,
+            app_name: APP_NAME,
+            app_display_name: APP_DISPLAY_NAME,
+            app_publisher: APP_PUBLISHER,
+            app_version: APP_VERSION,
+            exe_name: EXE_NAME,
+            app: &app,
+        };
+        platform::install_finalize(&ctx, &*log_arc);
+
+        let _ = app.emit("install-progress", 100u32);
+    });
+    Ok(())
+}
+
+#[tauri::command]
+fn default_install_dir(app: AppHandle) -> Result<String, String> {
+    let p = platform::default_install_root(&app, APP_NAME)?;
+    Ok(p.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+fn check_dir_status(path: String) -> Result<(bool, bool), String> {
+    let p = PathBuf::from(&path);
+    if !p.exists() {
+        return Ok((false, true));
+    }
+    if !p.is_dir() {
+        return Ok((true, false));
+    }
+    match fs::read_dir(&p) {
+        Ok(mut it) => Ok((true, it.next().is_none())),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+async fn launch_app(app: AppHandle) -> Result<(), String> {
+    platform::launch_installed_app(&app, APP_NAME, EXE_NAME)
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![
+            run_installation,
+            launch_app,
+            check_dir_status,
+            get_app_config,
+            default_install_dir
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}

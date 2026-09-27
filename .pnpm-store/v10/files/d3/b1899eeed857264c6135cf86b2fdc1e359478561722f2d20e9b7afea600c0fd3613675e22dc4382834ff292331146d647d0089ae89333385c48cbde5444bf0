@@ -1,0 +1,90 @@
+import type { ThemeProps } from "../../types";
+import "./synthwave.css";
+
+export default function SynthwaveTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center synth-root">
+      <div className="synth-window glass-draggable">
+        {/* 背景网格与太阳 */}
+        <div className="synth-bg">
+          <div className="synth-sun"></div>
+          <div className="synth-grid"></div>
+        </div>
+
+        <header data-tauri-drag-region>
+          <div className="synth-brand">{config.appDisplayName}</div>
+          <button className="synth-close" onClick={state.close}>✖</button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="synth-step synth-anim">
+              <h1 className="synth-glow-text">{texts.welcomeTitle}</h1>
+              <p className="synth-sub">{texts.welcomeSubtitle}</p>
+
+              <div className="synth-form">
+                <label>INSTALL_PATH</label>
+                <div className="synth-input-group" onClick={state.selectPath}>
+                  <div className="synth-path">{installPath}</div>
+                  <button className="synth-btn-sm">BROWSE</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="synth-step synth-anim synth-center">
+              <div className="synth-progress-container">
+                <div className="synth-percent" style={{ textShadow: `0 0 ${10 + progress/5}px var(--sw-pink)` }}>
+                  {progress}%
+                </div>
+                <div className="synth-progress-bar">
+                  <div className="synth-progress-fill" style={{ width: `${progress}%` }}></div>
+                </div>
+                <div className="synth-status">{getStatusText()}</div>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="synth-step synth-anim">
+              <h1 className="synth-glow-text" style={{ color: 'var(--sw-cyan)' }}>{texts.successTitle}</h1>
+              <p className="synth-sub">{texts.successSubtitle}</p>
+
+              <div className="synth-features">
+                {texts.features.map(f => (
+                  <div key={f.label} className="synth-feature-item">
+                    {f.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+
+        <footer>
+          {step === 1 && (
+            <>
+              <span className="synth-link">ACCEPT {texts.licenseAgreement}</span>
+              <button className="synth-btn" onClick={state.startInstall}>INITIALIZE</button>
+            </>
+          )}
+          {step === 3 && (
+            <button className="synth-btn synth-btn-cyan" onClick={state.launch}>START_SYSTEM</button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,1 @@
+import{s as t}from"./index-YDSTuOx6.js";async function o(a){return(await t.get(`/mod/${a}`)).data}async function c(a,s=1,r=20){return(await t.get("/mod/search",{params:{q:a,page:s,pageSize:r}})).data}async function d(){return(await t.get("/mod/stats")).data}export{o as a,d as g,c as s};

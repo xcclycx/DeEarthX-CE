@@ -1,0 +1,114 @@
+import type { ThemeProps } from "../../types";
+import logo from "../../assets/icon.png";
+import "./eco.css";
+
+export default function EcoTheme({ config, state }: ThemeProps) {
+  const { step, progress, installPath } = state;
+  const { texts, primaryColor } = config;
+
+  const getStatusText = () => {
+    for (let i = texts.progressFrames.length - 1; i >= 0; i--) {
+      if (progress <= texts.progressFrames[i].limit)
+        return texts.progressFrames[i].text;
+    }
+    return texts.progressFrames[texts.progressFrames.length - 1]?.text ?? "";
+  };
+
+  const cssVars: React.CSSProperties = {
+    // @ts-expect-error
+    "--eco-primary": primaryColor || "#4CAF50",
+  };
+
+  return (
+    <div className="w-screen h-screen flex justify-center items-center eco-root" style={cssVars}>
+      <div className="eco-window glass-draggable">
+        
+        {/* 背景自然元素点缀 */}
+        <div className="eco-blob eco-blob-1" />
+        <div className="eco-blob eco-blob-2" />
+
+        <header data-tauri-drag-region>
+          <div className="eco-brand">
+            <img src={logo} alt="Logo" className="eco-logo" />
+            <span>{config.appDisplayName}</span>
+          </div>
+          <button className="eco-close" onClick={state.close}>
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </header>
+
+        <main>
+          {step === 1 && (
+            <div className="eco-step eco-anim-soft">
+              <div className="eco-content">
+                <h1 className="eco-title">{texts.welcomeTitle}</h1>
+                <p className="eco-desc">{texts.welcomeSubtitle}</p>
+                
+                <div className="eco-path-wrapper" onClick={state.selectPath}>
+                  <div className="eco-path-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
+                  <div className="eco-path-text" title={installPath}>{installPath}</div>
+                  <div className="eco-path-hint">Tap to change</div>
+                </div>
+              </div>
+
+              <div className="eco-actions">
+                <a href="#" className="eco-link">{texts.licenseAgreement}</a>
+                <button className="eco-btn" onClick={state.startInstall}>
+                  {texts.installButton}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="eco-step eco-anim-soft eco-center">
+              <div className="eco-growth-container">
+                {/* 使用有机的圆角形状作为进度掩码 */}
+                <div className="eco-growth-mask">
+                  <div className="eco-growth-fill" style={{ height: `${progress}%` }}></div>
+                </div>
+                <div className="eco-growth-percent">{progress}%</div>
+              </div>
+              <div className="eco-status-text">{getStatusText()}</div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="eco-step eco-anim-soft">
+              <div className="eco-content eco-center-content">
+                <div className="eco-leaf-icon">
+                  <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </div>
+                <h1 className="eco-title">{texts.successTitle}</h1>
+                <p className="eco-desc">{texts.successSubtitle}</p>
+
+                <div className="eco-tags">
+                  {texts.features.map(f => (
+                    <span key={f.label} className="eco-tag" style={{ color: f.color, backgroundColor: `${f.color}15` }}>
+                      {f.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="eco-actions eco-actions-center">
+                <button className="eco-btn eco-btn-wide" onClick={state.launch}>
+                  {texts.launchButton}
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,314 @@
+/* 官方深海蓝黑+米色主题 (Coral/AVPlayPro Style) */
+
+.coral-root {
+  --app-dark: #161a25;
+  --app-cream: #faf8f6;
+  --app-coral: #f43f5e; /* Default fallback */
+  --app-coral-hover: color-mix(in srgb, var(--app-coral) 85%, black);
+  --app-badge-pink: color-mix(in srgb, var(--app-coral) 8%, transparent);
+  --app-text-pink: var(--app-coral);
+  --border-color: #e4e4e7;
+  --text-dark: #1c1917;
+  --text-muted: #78716c;
+  --cubic: cubic-bezier(0.16, 1, 0.3, 1);
+
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  letter-spacing: 1px;
+  background: transparent;
+}
+
+/* 安装器主窗口 */
+.app-installer {
+  width: 760px;
+  height: 440px;
+  background-color: var(--app-cream);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ================= 1. 复刻版：深色顶栏 ================= */
+.title-bar {
+  height: 48px;
+  background-color: var(--app-dark);
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  -webkit-app-region: drag;
+}
+
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 官方应用图标 */
+.app-mini-logo {
+  width: 16px;
+  height: 16px;
+  background-color: var(--app-coral);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  color: #fff;
+  font-weight: 900;
+}
+
+.brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.win-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: none;
+  padding: 0;
+}
+
+button.win-dot {
+  cursor: pointer;
+}
+button.win-dot:hover {
+  background-color: #ef4444;
+}
+
+/* ================= 2. 主体展示区（暖米色） ================= */
+.content-body {
+  flex-grow: 1;
+  padding: 48px 48px 36px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+/* 面板卡片切换 */
+.step-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1;
+  margin-bottom: 20px;
+}
+
+.coral-anim {
+  animation: coralFadeIn 0.4s var(--cubic) forwards;
+}
+
+@keyframes coralFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 状态胶囊标签（复刻应用内“任务下载中”标签样式） */
+.badge-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.badge-pill {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 12px;
+  line-height: 1;
+}
+
+.badge-pill.pink {
+  background-color: var(--app-badge-pink);
+  color: var(--app-text-pink);
+}
+
+.badge-pill.blue {
+  background-color: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+}
+
+/* 步骤 1：部署准备 */
+.step-panel h1,
+.step-panel h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.step-panel p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* 复刻版：搜索框式的圆角路径选择框 */
+.search-style-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px; /* 大圆角 */
+  padding: 6px 16px;
+  width: 100%;
+  height: 44px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.search-style-box input {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-dark);
+  width: 80%;
+  outline: none;
+  pointer-events: none;
+  text-overflow: ellipsis;
+}
+
+.btn-change-path {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.search-style-box:hover .btn-change-path {
+  color: var(--app-coral);
+}
+
+/* 步骤 2：解压安装（高契合度命令行状态栏） */
+.panel-progress {
+  justify-content: center;
+}
+
+/* 复刻：命令行状态栏 */
+.cli-status-bar {
+  font-family: monospace;
+  font-size: 13px;
+  color: #10b981; /* 经典的终端绿色提示 */
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 复刻应用内进度条 */
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--app-coral); /* 经典珊瑚红进度条 */
+  border-radius: 10px;
+  transition: width 0.3s linear;
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* 页脚操作栏 */
+.footer-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 20px;
+  z-index: 5;
+  -webkit-app-region: no-drag;
+}
+
+.protocol-box {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.protocol-box a {
+  color: var(--app-coral);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--app-coral) 20%, transparent);
+}
+
+.action-group {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* 官方胶囊形状按键 */
+.btn {
+  height: 38px;
+  padding: 0 24px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 20px; /* 大圆角按钮 */
+  transition: all 0.2s var(--cubic);
+  font-family: inherit;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  color: var(--text-dark);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+  background-color: var(--app-coral);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--app-coral-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--app-coral) 30%, transparent);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}

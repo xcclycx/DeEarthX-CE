@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Galaxy.Core/Galaxy.Core.csproj" />
+    <Project Path="src/Galaxy.Data/Galaxy.Data.csproj" />
+    <Project Path="src/Galaxy.Auth/Galaxy.Auth.csproj" />
+    <Project Path="src/Galaxy.Mods/Galaxy.Mods.csproj" />
+    <Project Path="src/Galaxy.OAuth/Galaxy.OAuth.csproj" />
+  </Folder>
+  <Project Path="Galaxy.csproj" />
+</Solution>

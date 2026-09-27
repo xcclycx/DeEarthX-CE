@@ -1,0 +1,1 @@
+import{d as t,o as a,a as r,b as s,h as n,t as c,r as l}from"./index-D26wNQo1.js";const i=t({__name:"ModTag",props:{ok:{type:Boolean}},setup(o){return(p,_)=>{const e=l("a-tag");return a(),r(e,{color:o.ok?"success":"error",style:{margin:"0"}},{default:s(()=>[n(c(o.ok?"✓ 合规":"✗ 不合规"),1)]),_:1},8,["color"])}}});export{i as _};

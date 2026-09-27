@@ -1,0 +1,64 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DeEarthX-V4",
+  "version": "4.0.1-beta",
+  "identifier": "top.tianpao.dex-v4-ui",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:9888",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "DeEarthX V4",
+        "width": 1024,
+        "height": 600,
+        "minWidth": 800,
+        "minHeight": 500,
+        "dragDropEnabled": false,
+        "fullscreen": false,
+        "resizable": true,
+        "center": true,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {
+    "shell": {
+      "open": true
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "externalBin": ["binaries/core"],
+    "resources": [
+      "binaries/*.dll",
+      "binaries/*.pdb",
+      "binaries/*.deps.json",
+      "binaries/*.runtimeconfig.json",
+      "binaries/appsettings.json",
+      "binaries/web.config"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "wix": {
+        "language": "zh-CN"
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\DeEarthX.Dex\DeEarthX.Dex.csproj" />
+    <ProjectReference Include="..\DeEarthX.ModLoader\DeEarthX.ModLoader.csproj" />
+    <ProjectReference Include="..\DeEarthX.Platform\DeEarthX.Platform.csproj" />
+    <ProjectReference Include="..\DeEarthX.Dearth\DeEarthX.Dearth.csproj" />
+    <ProjectReference Include="..\DeEarthX.Plugins\DeEarthX.Plugins.csproj" />
+    <ProjectReference Include="..\DeEarthX.Templates\DeEarthX.Templates.csproj" />
+    <ProjectReference Include="..\DeEarthX.Galaxy\DeEarthX.Galaxy.csproj" />
+    <ProjectReference Include="..\DeEarthX.Realtime\DeEarthX.Realtime.csproj" />
+    <ProjectReference Include="..\DeEarthX.Infrastructure\DeEarthX.Infrastructure.csproj" />
+    <ProjectReference Include="..\DeEarthX.Core\DeEarthX.Core.csproj" />
+  </ItemGroup>
+</Project>

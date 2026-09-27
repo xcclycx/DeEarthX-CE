@@ -1,0 +1,191 @@
+// Windows 实现：注册表写卸载信息 + 开始菜单/桌面 .lnk 快捷方式
+
+use mslnk::ShellLink;
+use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use tauri::{AppHandle, Manager};
+use winreg::enums::*;
+use winreg::RegKey;
+
+use super::{InstallContext, LogFn};
+
+pub fn default_install_root(app: &AppHandle, app_name: &str) -> Result<PathBuf, String> {
+    let base = app.path().local_data_dir().map_err(|e| e.to_string())?;
+    Ok(base.join(app_name))
+}
+
+pub fn install_finalize(ctx: &InstallContext, log: LogFn) {
+    let target_exe = ctx.install_dir.join(ctx.exe_name);
+    if !target_exe.exists() {
+        log(format!(
+            "解压完成但找不到 {}，跳过快捷方式创建",
+            ctx.exe_name
+        ));
+    } else {
+        // 开始菜单
+        if let Ok(app_data) = env::var("APPDATA") {
+            let start_menu = PathBuf::from(app_data)
+                .join("Microsoft")
+                .join("Windows")
+                .join("Start Menu")
+                .join("Programs");
+            let _ = fs::create_dir_all(&start_menu);
+            let lnk = start_menu.join(format!("{}.lnk", ctx.app_name));
+            if let Err(e) = make_shortcut(ctx, &target_exe, ctx.install_dir, &lnk) {
+                log(format!("开始菜单快捷方式失败: {e}"));
+            } else {
+                log("开始菜单快捷方式已创建".to_string());
+            }
+        }
+        // 桌面
+        if let Ok(desktop) = ctx.app.path().desktop_dir() {
+            let lnk = desktop.join(format!("{}.lnk", ctx.app_name));
+            if let Err(e) = make_shortcut(ctx, &target_exe, ctx.install_dir, &lnk) {
+                log(format!("桌面快捷方式失败: {e}"));
+            }
+        }
+    }
+
+    if let Err(e) = write_uninstall_registry(ctx) {
+        log(format!("写入卸载注册表失败: {e}"));
+    }
+}
+
+pub fn launch_installed_app(
+    app: &AppHandle,
+    app_name: &str,
+    exe_name: &str,
+) -> Result<(), String> {
+    // 优先从注册表读 InstallLocation
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let reg_path = format!(
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{}",
+        app_name
+    );
+    let install_dir: Option<PathBuf> = hkcu
+        .open_subkey(&reg_path)
+        .ok()
+        .and_then(|k| k.get_value::<String, _>("InstallLocation").ok())
+        .map(PathBuf::from);
+
+    let exe_path = match install_dir {
+        Some(dir) => dir.join(exe_name),
+        None => default_install_root(app, app_name)?.join(exe_name),
+    };
+
+    if exe_path.exists() {
+        Command::new(&exe_path)
+            .current_dir(exe_path.parent().unwrap_or(Path::new(".")))
+            .spawn()
+            .map_err(|e| e.to_string())?;
+        Ok(())
+    } else {
+        Err(format!("找不到已安装的程序：{}", exe_path.display()))
+    }
+}
+
+fn notify_shell_changed(path: &Path) {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::UI::Shell::{
+        SHChangeNotify, SHCNE_ASSOCCHANGED, SHCNE_CREATE, SHCNF_IDLIST, SHCNF_PATHW,
+    };
+    let wide: Vec<u16> = path
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
+    unsafe {
+        SHChangeNotify(
+            SHCNE_CREATE as i32,
+            SHCNF_PATHW,
+            wide.as_ptr() as *const _,
+            std::ptr::null(),
+        );
+        SHChangeNotify(
+            SHCNE_ASSOCCHANGED as i32,
+            SHCNF_IDLIST,
+            std::ptr::null(),
+            std::ptr::null(),
+        );
+    }
+}
+
+fn make_shortcut(
+    ctx: &InstallContext,
+    target_exe: &Path,
+    install_dir: &Path,
+    lnk_path: &Path,
+) -> Result<(), String> {
+    let mut sl = ShellLink::new(target_exe).map_err(|e| format!("ShellLink::new: {e}"))?;
+    sl.set_name(Some(ctx.app_display_name.to_string()));
+    sl.set_working_dir(Some(install_dir.to_string_lossy().to_string()));
+    sl.set_icon_location(Some(target_exe.to_string_lossy().to_string()));
+    sl.create_lnk(lnk_path)
+        .map_err(|e| format!("create_lnk {}: {e}", lnk_path.display()))?;
+    notify_shell_changed(lnk_path);
+    Ok(())
+}
+
+fn dir_size_kb(path: &Path) -> u64 {
+    fn walk(p: &Path) -> u64 {
+        let mut sum: u64 = 0;
+        if let Ok(rd) = fs::read_dir(p) {
+            for entry in rd.flatten() {
+                if let Ok(ft) = entry.file_type() {
+                    if ft.is_dir() {
+                        sum += walk(&entry.path());
+                    } else if let Ok(m) = entry.metadata() {
+                        sum += m.len();
+                    }
+                }
+            }
+        }
+        sum
+    }
+    walk(path) / 1024
+}
+
+fn write_uninstall_registry(ctx: &InstallContext) -> std::io::Result<()> {
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let path = format!(
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{}",
+        ctx.app_name
+    );
+    let (key, _) = hkcu.create_subkey(&path)?;
+
+    let exe_path = ctx.install_dir.join(ctx.exe_name);
+    let install_dir_str = ctx.install_dir.to_string_lossy().to_string();
+
+    key.set_value("DisplayName", &ctx.app_display_name)?;
+    key.set_value("DisplayVersion", &ctx.app_version)?;
+    key.set_value("Publisher", &ctx.app_publisher)?;
+    key.set_value("DisplayIcon", &exe_path.to_string_lossy().to_string())?;
+    key.set_value("InstallLocation", &install_dir_str)?;
+    key.set_value("EstimatedSize", &(dir_size_kb(ctx.install_dir) as u32))?;
+    key.set_value("NoModify", &1u32)?;
+    key.set_value("NoRepair", &1u32)?;
+
+    let appdata = env::var("APPDATA").unwrap_or_default();
+    let start_menu_lnk = format!(
+        "{}\\Microsoft\\Windows\\Start Menu\\Programs\\{}.lnk",
+        appdata, ctx.app_name
+    );
+    let desktop_lnk_pattern = format!("$env:USERPROFILE + '\\Desktop\\{}.lnk'", ctx.app_name);
+
+    let uninstall_cmd = format!(
+        "powershell.exe -NoProfile -WindowStyle Hidden -Command \"\
+            Remove-Item -LiteralPath '{lnk}' -Force -ErrorAction SilentlyContinue; \
+            Remove-Item -LiteralPath ({desk}) -Force -ErrorAction SilentlyContinue; \
+            Remove-Item -LiteralPath '{dir}' -Recurse -Force -ErrorAction SilentlyContinue; \
+            Remove-Item -LiteralPath 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{name}' -Recurse -Force -ErrorAction SilentlyContinue\"",
+        lnk = start_menu_lnk,
+        desk = desktop_lnk_pattern,
+        dir = install_dir_str,
+        name = ctx.app_name,
+    );
+    key.set_value("UninstallString", &uninstall_cmd)?;
+    key.set_value("QuietUninstallString", &uninstall_cmd)?;
+    Ok(())
+}
